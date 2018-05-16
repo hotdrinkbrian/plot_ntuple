@@ -25,6 +25,7 @@ twoD = 0 # 2D plot option: 0 --> 1D
 CHS = 0 # CHS jet option: 0 --> off
 
 number_of_bin = 100
+num_of_jets = 1
 #attr = ['pt', 'eta', 'phi', 'CSV', 'chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
 #attr = ['pt', 'nhf', 'phf', 'elf', 'muf']
 #attr = ['CSV', 'chf']
@@ -32,6 +33,35 @@ number_of_bin = 100
 attr = ['chm','cm']
 #attr = ['chf','chm','cm','pt']
 #attr = ['dR_q1','dR_q2','dR_q3','dR_q4']
+
+cut_dR = []
+cut_eta = []
+cut_pt = []
+cut_chf = []
+
+jet = []
+####################################generating list with 10 Jets
+def jet_gen():
+    ii = 0
+    while ii < num_of_jets:
+        ii+=1
+        if CHS == 0:
+            jet.append('Jet' + "%s" %ii)
+        elif CHS == 1:
+            jet.append('CHSJet' + "%s" %ii)
+####################################generating list with 10 Jets
+jet_gen()
+
+"""
+########################
+def clear_cut():
+    cut_dR = []
+    cut_eta = []
+    cut_pt = []
+    cut_chf = []
+########################
+"""
+
 #####################Settings#####################################################################################
 
 file_dict = {}
@@ -42,23 +72,15 @@ for cc in channel:
 #n = tree.GetEntries()
 #file_dict['qcd'].Close()
 hist = {}
+hist_CHS = {}
 tree = {}
 ##############################
 for cc in channel:
     hist[cc] = {}
+    hist_CHS[cc] = {}
     tree[cc] = {}
 ##############################
 
-#####################################################################################
-def findbin(sample):
-    nn = number_of_bin+1
-    ll = 0
-    edge = 0.009
-    while ll < nn:
-        if (hist[sample]['pt'][ll] >= edge) and (hist[sample]['pt'][ll] <= edge+0.002):
-            print(ll * (300/number_of_bin))
-        ll+=1
-#####################################################################################
 """
 ###########################################################
 def findDirName() 
@@ -146,30 +168,42 @@ def write_1(var,sample):
 
         if twoD == 0:
             hist[sample][s[1]] = TH1F(sample + s[1], '; %s; events' %s[1] , h_par[0], h_par[1], h_par[2])
+            hist_CHS[sample][s[1]] = TH1F(sample + s[1] + 'CHS', '; %s; events' %s[1] , h_par[0], h_par[1], h_par[2])
         elif twoD == 1:
             hist[sample][s[1]] = TH2F(sample + s[1], '; %s; events' %s[1] , h_par[0], h_par[1], h_par[2] , number_of_bin, 0, 300)
+            hist_CHS[sample][s[1]] = TH2F(sample + s[1] + 'CHS', '; %s; events' %s[1] , h_par[0], h_par[1], h_par[2] , number_of_bin, 0, 300)
         print( tree[sample][s[1]] )
         hist[sample][s[1]].Sumw2()
+        hist_CHS[sample][s[1]].Sumw2()
 
         if twoD == 0:
             tree[sample][s[1]].Project(sample+s[1], var + '.' + s[1], cutting ) #cut )
+            tree[sample][s[1]].Project(sample+s[1]+'CHS', 'CHS' + var + '.' + s[1], cutting_CHS )
         elif twoD == 1:
             tree[sample][s[1]].Project(sample+s[1], var + '.' + s[1] + ':' + var + '.' + 'pt', cutting ) #cut )
+            tree[sample][s[1]].Project(sample+s[1]+'CHS', 'CHS' + var + '.' + s[1] + ':' + var + '.' + 'pt', cutting_CHS )              
 
-        if hist[sample][s[1]].Integral() != 0:
+        if hist[sample][s[1]].Integral() != 0 and hist_CHS[sample][s[1]].Integral() != 0:
             hist[sample][s[1]].Scale(1/float(hist[sample][s[1]].Integral()))
+            hist_CHS[sample][s[1]].Scale(1/float(hist_CHS[sample][s[1]].Integral()))
         else:
             print("denominator zero!")
         entr = tree[sample][s[1]].GetEntries(cutting)
         hist[sample][s[1]].SetLineColor(color1)
         hist[sample][s[1]].SetLineWidth(3)
         hist[sample][s[1]].SetTitle('cut: ' + cutting + '[entries after cut:' + '%s]' %entr)
+        hist_CHS[sample][s[1]].SetLineColor(color1+44)
+        hist_CHS[sample][s[1]].SetLineWidth(3)
+        #hist_CHS[sample][s[1]].SetTitle('cut: ' + cutting + '[entries after cut:' + '%s]' %entr) 
+         
         #hist[sample][s[1]].SetTitleSize(0.4,'t')
         #hist[sample][s[1]].GetYaxis().SetTitleOffset(1.6)		
         if s[1] == 'elf':
             hist[sample][s[1]].SetAxisRange(0., 0.02,"Y")
+            hist_CHS[sample][s[1]].SetAxisRange(0., 0.02,"Y")
         elif s[1] == 'muf':
-            hist[sample][s[1]].SetAxisRange(0., 0.02,"Y")        			
+            hist[sample][s[1]].SetAxisRange(0., 0.02,"Y")  
+            hist_CHS[sample][s[1]].SetAxisRange(0., 0.02,"Y")      			
         print( hist[sample][s[1]].GetEntries() )
         #xx = gROOT.FindObject( "%s" %(sample + s[1]) ) #to find the histogram
         #xx.Delete()    #to delete the histogram
@@ -185,6 +219,7 @@ def plot_2(var):
             c1.SetLogx()
         for cc in channel:
             hist[cc][s[1]].Draw('colz same')
+            hist_CHS[cc][s[1]].Draw('colz same')
         #hist['qcd'][s[1]].Draw()
         #hist['ctau0'][s[1]].Draw('same')
         #hist['ttt'][s[1]].Draw('same')
@@ -192,6 +227,7 @@ def plot_2(var):
         legend.SetHeader('samples')
         for cc in channel:
             legend.AddEntry(hist[cc][s[1]],cc)
+            legend.AddEntry(hist_CHS[cc][s[1]],cc)
         #legend.AddEntry(hist['qcd'][s[1]],'qcd')
         #legend.AddEntry(hist['ctau0'][s[1]],'ctau0')
         #legend.AddEntry(hist['ttt'][s[1]],'ttt')
@@ -201,36 +237,45 @@ def plot_2(var):
 ##########################################################
 
 ########################################################################
+def cut_gen():
+    cut_dR.append( '(' + cut_name + 'dR_q1' + '<' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q1'+ '>=' + '0' + ')' + '&&' + '(' + cut_name + 'dR_q2'+ '>=' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q3'+ '>=' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q4'+ '>=' + '0.4' + ')' )
+    cut_eta.append( "(" + cut_name + 'eta' + '<' + '2.4' + ')' + '&&' + '(' + cut_name + 'eta' + '>' + '-2.4' + ')' )
+    cut_chf.append( "(" + cut_name + 'chf' + '<' + '0.2' + ')' )
+    cut_pt.append( "(" + cut_name + 'pt' + '>' + '15' + ')' )
+########################################################################
+
+########################################################################
 def clear(sample):
     for s in enumerate(attr):
         xx = gROOT.FindObject( "%s" %(sample + s[1]) ) #to find the histogram
         xx.Delete()    #to delete the histogram
 ########################################################################
 
-####################################generating list with 10 Jets
-jet = []
-ii = 0
-num_of_jets = 1
-while ii < num_of_jets:
-    ii+=1
-    if CHS == 0:
-        jet.append('Jet' + "%s" %ii)
-    elif CHS == 1:
-        jet.append('CHSJet' + "%s" %ii)
-####################################generating list with 10 Jets
+
 
 ###########################################
 cut_GenBquark = [ '(GenBquark1.pt>15)&&(GenBquark1.eta<2.4)&&(GenBquark1.eta>-2.4)' ]
+
 for i in enumerate(jet):
     cut_name = i[1] + '.'
-    cut_dR = [ '(' + cut_name + 'dR_q1' + '<' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q1'+ '>=' + '0' + ')' + '&&' + '(' + cut_name + 'dR_q2'+ '>=' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q3'+ '>=' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q4'+ '>=' + '0.4' + ')' ]
-    #cut_dR = [ '(' + cut_name + 'dR_q1' + '<' + '0.4' + ')' ]
-    cut_eta = [ "(" + cut_name + 'eta' + '<' + '2.4' + ')' + '&&' + '(' + cut_name + 'eta' + '>' + '-2.4' + ')' ]	
-    cut_chf = [ "(" + cut_name + 'chf' + '<' + '0.2' + ')' ]
-    #cut_pt = [ "(" + cut_name + 'pt' + '>' + '15' + ')' + '&&' + '(' + cut_name + 'pt'+ '>' + '68' + ')' + '&&' + '(' + cut_name + 'pt'+ '<' + '75' + ')' ]
-    cut_pt = [ "(" + cut_name + 'pt' + '>' + '15' + ')' ]
-    #cutting = cut_dR[0] + '&&' + cut_chf[0] + '&&' + cut_GenBquark[0]
-    cutting = cut_pt[0] + '&&' + cut_dR[0] + '&&' + cut_eta[0] + '&&' + cut_GenBquark[0]
+    cut_gen()
+cutting = cut_pt[0] + '&&' + cut_dR[0] + '&&' + cut_eta[0] + '&&' + cut_GenBquark[0]
+
+#clear_cut()
+cut_dR = []
+cut_eta = []
+cut_pt = []
+cut_chf = []
+
+print(cut_pt)
+for i in enumerate(jet):
+    cut_name = 'CHS' + i[1] + '.'
+    cut_gen()
+cutting_CHS = cut_pt[0] + '&&' + cut_dR[0] + '&&' + cut_eta[0] + '&&' + cut_GenBquark[0]
+print(cut_pt)
+
+
+for i in enumerate(jet):
     for cc in channel:
         write_1(i[1],cc)
     plot_2(i[1])
@@ -239,4 +284,18 @@ for i in enumerate(jet):
         hist[cc].clear()
         tree[cc].clear()
 ############################################
+
+
+"""
+cut_dict = {}
+
+########################################################################
+def cut_gen(feat,a,b):
+    cut_dict[feat] = [ "(" + cut_name + feat + '<' + '0.2' + ')' ]
+########################################################################
+"""
+
+
+
+
 
