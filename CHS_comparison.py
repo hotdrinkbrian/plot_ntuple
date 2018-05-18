@@ -4,7 +4,7 @@ import math
 from timeit import default_timer as timer
 
 start= timer()
-#####################Settings#####################################################################################
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Settings~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 gStyle.SetOptStat(0)
 path0 = "/nfs/dust/cms/user/lbenato/RecoStudies_ntuples_v3/"
 path1 = "/afs/desy.de/user/h/hezhiyua/private/qcd_vs_ctau0p60g_v3/"
@@ -26,77 +26,78 @@ channel = {
            'vbfct0p60g':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root'   	   
           }
 
-
 twoD = 0 # 2D plot option: 0 --> 1D
 CHS = 0 # CHS jet option: 0 --> off
-
 number_of_bin = 100
 num_of_jets = 1
-#attr = ['pt', 'eta', 'phi', 'CSV', 'chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
-#attr = ['pt', 'nhf', 'phf', 'elf', 'muf']
-#attr = ['CSV', 'chf']
-#attr = ['pt']
+attr = ['pt']
 #attr = ['chm','cm']
+#attr = ['CSV', 'chf']
 #attr = ['chf','chm','cm','pt']
 #attr = ['dR_q1','dR_q2','dR_q3','dR_q4']
-attr = ['nPV']
-
-cut_dR = []
-cut_eta = []
-cut_pt = []
-cut_chf = []
-########################
-def clear_cut():
-    cut_dR[:] = []
-    cut_eta[:] = []
-    cut_pt[:] = []
-    cut_chf[:] = []
-########################
-
-
-#####################Settings#####################################################################################
+#attr = ['pt', 'nhf', 'phf', 'elf', 'muf']
+#attr = ['pt', 'eta', 'phi', 'CSV', 'chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
 
 ####################################generating list with 10 Jets
-def jet_gen(n):
-    ii = 0
+def jet_list_gen(n):
     jl = []
-    while ii < n:
-        ii+=1
+    for ii in range(1,n+1): 
         if CHS == 0:
             jl.append('Jet' + "%s" %ii)
         elif CHS == 1:
             jl.append('CHSJet' + "%s" %ii)
     return jl
 ####################################generating list with 10 Jets
-jet = jet_gen(num_of_jets)
+jet = jet_list_gen(num_of_jets)
 
+#++++++++++++++++++++++++++++cuts+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+########################################################################
+def cut_dict_gen(cut_name):
+    cut_dict = {}
+    cut_dict['pt'] =  '(' + cut_name + 'pt' + '>' + '15' + ')'
+    cut_dict['eta'] = '(' + cut_name + 'eta' + '<' + '2.4' + ')' + '&&' + '(' + cut_name + 'eta' + '>' + '-2.4' + ')'
+    cut_dict['dR'] = '(' + cut_name + 'dR_q1' + '<' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q2'+ '>=' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q3'+ '>=' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q4'+ '>=' + '0.4' + ')'
+    cut_dict['chf'] = ''
+    #cut_dict['GenBquark'] = '(GenBquark1.pt>15)&&(GenBquark1.eta<2.4)&&(GenBquark1.eta>-2.4)' 
+    return cut_dict
+########################################################################
+###################################################################################################
+def cutting_gen(pref):
+    for i in jet:
+        cuts = cut_dict_gen( pref + i + '.'  )
+    cuttings = cuts['pt'] + '&&' + cuts['eta'] + '&&' + cuts['dR']  #+ '&&' + cut_dict['GenBquark']
+    return cuttings
+###################################################################################################
+cutting = cutting_gen('')
+print('---------cut:')
+print(cutting)
+cutting_CHS = cutting_gen('CHS')
+print('---------cut_CHS:')
+print(cutting_CHS)
+#++++++++++++++++++++++++++++cuts+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
-file_dict = {}
+#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Settings~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 ####################
 def file_dict_gen(path,chann):
     fd = {}
     for cc in channel:
          fd[cc] = TFile(path + chann[cc],"r")
-         #file_dict[cc] = TFile(path0 + channel[cc],"r")
-         #file_dict[cc].Close()
     return fd
 ####################
 file_dict = file_dict_gen(path0,channel)
 
-
-#n = tree.GetEntries()
+tree = {}
 hist = {}
 hist_CHS = {}
-tree = {}
 ##############################
 for cc in channel:
     hist[cc] = {}
     hist_CHS[cc] = {}
 ##############################
 
-
-
-def write_1(var,sample):
+####################################################################################################################
+def write_1(var,sample,cuts):
     for s in attr:
         if sample == 'qcd':
             color1 = 4
@@ -157,12 +158,10 @@ def write_1(var,sample):
             h_par = [number_of_bin,-1.1,3*math.pi]
         elif s == 'dR_q4':
             h_par = [number_of_bin,-1.1,3*math.pi]
-
         elif s == 'nPV':
             h_par = [number_of_bin,0,80]
 
         tree[sample] = file_dict[sample].Get('reconstruction;1').Get('tree') #.Get('ntuple;1').Get('tree')
-
         if twoD == 0:
             hist[sample][s] = TH1F(sample+s, '; %s; events' %s , h_par[0], h_par[1], h_par[2])
             hist_CHS[sample][s] = TH1F(sample+s + 'CHS', '; %s; events' %s , h_par[0], h_par[1], h_par[2])
@@ -174,24 +173,23 @@ def write_1(var,sample):
         hist_CHS[sample][s].Sumw2()
 
         if twoD == 0:
-            tree[sample].Project(sample+s, var + '.' + s, cutting ) 
-            tree[sample].Project(sample+s+'CHS', 'CHS' + var + '.' + s, cutting_CHS )
+            tree[sample].Project(sample+s, var + '.' + s, cuts ) 
+            tree[sample].Project(sample+s+'CHS', 'CHS' + var + '.' + s, cuts + '_CHS' )
         elif twoD == 1:
-            tree[sample].Project(sample+s, var + '.' + s + ':' + var + '.' + 'pt', cutting ) 
-            tree[sample].Project(sample+s+'CHS', 'CHS' + var + '.' + s + ':' + var + '.' + 'pt', cutting_CHS )              
+            tree[sample].Project(sample+s, var + '.' + s + ':' + var + '.' + 'pt', cuts ) 
+            tree[sample].Project(sample+s+'CHS', 'CHS' + var + '.' + s + ':' + var + '.' + 'pt', cuts + '_CHS' )              
 
         if hist[sample][s].Integral() != 0 and hist_CHS[sample][s].Integral() != 0:
             hist[sample][s].Scale(1/float(hist[sample][s].Integral()))
             hist_CHS[sample][s].Scale(1/float(hist_CHS[sample][s].Integral()))
         else:
             print("zero denominator!")
-        entr = tree[sample].GetEntries(cutting)
+        entr = tree[sample].GetEntries(cuts)
         hist[sample][s].SetLineColor(color1)
         hist[sample][s].SetLineWidth(3)
-        hist[sample][s].SetTitle('cut: ' + cutting.replace('(','_').replace(')','_').replace('&&',',').replace('Jet','J').replace('GenBquark','GBQ') + '[entries:' + str(entr) + ']')
+        hist[sample][s].SetTitle('cut: ' + cuts.replace('(','_').replace(')','_').replace('&&',',').replace('Jet','J').replace('GenBquark','GBQ') + '[entries:' + str(entr) + ']')
         hist_CHS[sample][s].SetLineColor(color1+44)
         hist_CHS[sample][s].SetLineWidth(3)
-  
         #hist[sample][s].SetTitleSize(0.4,'t')
         #hist[sample][s].GetYaxis().SetTitleOffset(1.6)		
         if s == 'elf':
@@ -201,9 +199,10 @@ def write_1(var,sample):
             hist[sample][s].SetAxisRange(0., 0.02,"Y")  
             hist_CHS[sample][s].SetAxisRange(0., 0.02,"Y")      			
         print( hist[sample][s].GetEntries() )
+####################################################################################################################
 
 ##########################################################
-def plot_2(var):
+def plot_2(var,cuts):
     for s in attr:
         c1 = TCanvas("c1", "Signals", 800, 800)
         c1.cd()
@@ -215,25 +214,16 @@ def plot_2(var):
             hist[cc][s].Draw('colz same')
             hist_CHS[cc][s].Draw('colz same')
         legend = TLegend(0.89, 0.89, 0.99, 0.99)
-        #legend.SetHeader('samples')
+        #legend.SetHeader('Samples')
         for cc in channel:
             legend.AddEntry(hist[cc][s],cc)
             legend.AddEntry(hist_CHS[cc][s],cc + 'CHS')
         legend.Draw()
-        c1.Print(path1 + s + var + cutting.replace('(','_').replace(')','_').replace('&&','A').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
+        c1.Print(path1 + s + var + cuts.replace('(','_').replace(')','_').replace('&&','A').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
         c1.Update()
         c1.Close() 
         print('|||||||||||||||||||||||||||||||||||||||||||||||||||')
 ##########################################################
-
-########################################################################
-def cut_gen():
-    #cut_dR.append( '(' + cut_name + 'dR_q1' + '<' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q1'+ '>=' + '0' + ')' + '&&' + '(' + cut_name + 'dR_q2'+ '>=' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q3'+ '>=' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q4'+ '>=' + '0.4' + ')' )
-    cut_dR.append( '(' + cut_name + 'dR_q1' + '<' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q2'+ '>=' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q3'+ '>=' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q4'+ '>=' + '0.4' + ')' )
-    cut_eta.append( "(" + cut_name + 'eta' + '<' + '2.4' + ')' + '&&' + '(' + cut_name + 'eta' + '>' + '-2.4' + ')' )
-    cut_chf.append( "(" + cut_name + 'chf' + '<' + '0.2' + ')' )
-    cut_pt.append( "(" + cut_name + 'pt' + '>' + '15' + ')' )
-########################################################################
 
 ########################################################################
 def clear_hist(sample):
@@ -246,39 +236,16 @@ def clear_hist(sample):
             hhchs.Delete()    #to delete the histogram
 ########################################################################
 
-
-
 #===========================================================================================
 #===========================================================================================
-#cut_GenBquark = [ '(GenBquark1.pt>15)&&(GenBquark1.eta<2.4)&&(GenBquark1.eta>-2.4)' ]
-for i in jet:
-    cut_name = i + '.'
-    cut_gen()
-cutting = cut_pt[0] + '&&' + cut_dR[0] + '&&' + cut_eta[0] #+ '&&' + cut_GenBquark[0]
-print('---------cut:')
-print(cutting)
-clear_cut()
-print(cut_pt)
-for i in jet:
-    cut_name = 'CHS' + i + '.'
-    cut_gen()
-cutting_CHS = cut_pt[0] + '&&' + cut_dR[0] + '&&' + cut_eta[0] #+ '&&' + cut_GenBquark[0]
-print('---------cut:')
-print(cutting)
-
 for i in jet:
     for cc in channel:
-        write_1(i,cc)
-    plot_2(i)
-    #print(hist)
-    #print(tree)
+        write_1(i,cc,cutting)
+    plot_2(i,cutting)
     for cc in channel:
-        clear_hist(cc)
-        #print(hist)
-        #print(tree) 
+        clear_hist(cc) 
         hist[cc].clear()
-        tree.clear()
-        
+        tree.clear()   
 for cc in channel:
         file_dict[cc].Close()
 #===========================================================================================
