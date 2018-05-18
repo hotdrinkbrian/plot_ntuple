@@ -22,6 +22,8 @@ channel = {
           }
 """
 channel = {
+           'qcd':'QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root',
+           'ttt':'TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root',
            'vbfHToBB':'VBFHToBB_M-125_13TeV_powheg_pythia8.root',
            'vbfct0p60g':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root'   	   
           }
@@ -33,12 +35,6 @@ CHS = 0 # CHS jet option: 0 --> off
 number_of_bin = 100
 num_of_jets = 1
 #attr = ['pt', 'eta', 'phi', 'CSV', 'chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
-#attr = ['pt', 'nhf', 'phf', 'elf', 'muf']
-#attr = ['CSV', 'chf']
-#attr = ['pt']
-#attr = ['chm','cm']
-#attr = ['chf','chm','cm','pt']
-#attr = ['dR_q1','dR_q2','dR_q3','dR_q4']
 attr = ['nPV']
 
 cut_dR = []
@@ -165,32 +161,34 @@ def write_1(var,sample):
 
         if twoD == 0:
             hist[sample][s] = TH1F(sample+s, '; %s; events' %s , h_par[0], h_par[1], h_par[2])
-            hist_CHS[sample][s] = TH1F(sample+s + 'CHS', '; %s; events' %s , h_par[0], h_par[1], h_par[2])
+            #hist_CHS[sample][s] = TH1F(sample+s + 'CHS', '; %s; events' %s , h_par[0], h_par[1], h_par[2])
         elif twoD == 1:
             hist[sample][s] = TH2F(sample+s, '; %s; events' %s , h_par[0], h_par[1], h_par[2] , number_of_bin, 0, 300)
-            hist_CHS[sample][s] = TH2F(sample+s +'CHS', '; %s; events' %s , h_par[0], h_par[1], h_par[2] , number_of_bin, 0, 300)
+            #hist_CHS[sample][s] = TH2F(sample+s +'CHS', '; %s; events' %s , h_par[0], h_par[1], h_par[2] , number_of_bin, 0, 300)
         print( tree[sample] )
         hist[sample][s].Sumw2()
-        hist_CHS[sample][s].Sumw2()
+        #hist_CHS[sample][s].Sumw2()
 
         if twoD == 0:
-            tree[sample].Project(sample+s, var + '.' + s, cutting ) 
-            tree[sample].Project(sample+s+'CHS', 'CHS' + var + '.' + s, cutting_CHS )
+            #tree[sample].Project(sample+s, var + '.' + s, cutting ) 
+            tree[sample].Project(sample+s,s, cutting )
+            #tree[sample].Project(sample+s+'CHS', 'CHS' + var + '.' + s, cutting_CHS )
         elif twoD == 1:
-            tree[sample].Project(sample+s, var + '.' + s + ':' + var + '.' + 'pt', cutting ) 
-            tree[sample].Project(sample+s+'CHS', 'CHS' + var + '.' + s + ':' + var + '.' + 'pt', cutting_CHS )              
+            #tree[sample].Project(sample+s, var + '.' + s + ':' + var + '.' + 'pt', cutting ) 
+            tree[sample].Project(sample+s, s + ':' + var + '.' + 'pt', cutting )
+            #tree[sample].Project(sample+s+'CHS', 'CHS' + var + '.' + s + ':' + var + '.' + 'pt', cutting_CHS )              
 
-        if hist[sample][s].Integral() != 0 and hist_CHS[sample][s].Integral() != 0:
+        if hist[sample][s].Integral() != 0: #and hist_CHS[sample][s].Integral() != 0:
             hist[sample][s].Scale(1/float(hist[sample][s].Integral()))
-            hist_CHS[sample][s].Scale(1/float(hist_CHS[sample][s].Integral()))
+            #hist_CHS[sample][s].Scale(1/float(hist_CHS[sample][s].Integral()))
         else:
             print("zero denominator!")
         entr = tree[sample].GetEntries(cutting)
         hist[sample][s].SetLineColor(color1)
         hist[sample][s].SetLineWidth(3)
         hist[sample][s].SetTitle('cut: ' + cutting.replace('(','_').replace(')','_').replace('&&',',').replace('Jet','J').replace('GenBquark','GBQ') + '[entries:' + str(entr) + ']')
-        hist_CHS[sample][s].SetLineColor(color1+44)
-        hist_CHS[sample][s].SetLineWidth(3)
+        #hist_CHS[sample][s].SetLineColor(color1+44)
+        #hist_CHS[sample][s].SetLineWidth(3)
   
         #hist[sample][s].SetTitleSize(0.4,'t')
         #hist[sample][s].GetYaxis().SetTitleOffset(1.6)		
@@ -213,14 +211,14 @@ def plot_2(var):
             c1.SetLogx()
         for cc in channel:
             hist[cc][s].Draw('colz same')
-            hist_CHS[cc][s].Draw('colz same')
+            #hist_CHS[cc][s].Draw('colz same')
         legend = TLegend(0.89, 0.89, 0.99, 0.99)
         #legend.SetHeader('samples')
         for cc in channel:
             legend.AddEntry(hist[cc][s],cc)
-            legend.AddEntry(hist_CHS[cc][s],cc + 'CHS')
+            #legend.AddEntry(hist_CHS[cc][s],cc + 'CHS')
         legend.Draw()
-        c1.Print(path1 + s + var + cutting.replace('(','_').replace(')','_').replace('&&','A').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
+        c1.Print(path1 + s + cutting.replace('(','_').replace(')','_').replace('&&','A').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
         c1.Update()
         c1.Close() 
         print('|||||||||||||||||||||||||||||||||||||||||||||||||||')
@@ -270,12 +268,8 @@ for i in jet:
     for cc in channel:
         write_1(i,cc)
     plot_2(i)
-    #print(hist)
-    #print(tree)
     for cc in channel:
         clear_hist(cc)
-        #print(hist)
-        #print(tree) 
         hist[cc].clear()
         tree.clear()
         
