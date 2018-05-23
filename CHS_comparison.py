@@ -7,7 +7,8 @@ start= timer()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Settings~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 gStyle.SetOptStat(0)
 path0 = "/nfs/dust/cms/user/lbenato/RecoStudies_ntuples_v3/"
-path1 = "/afs/desy.de/user/h/hezhiyua/private/qcd_vs_ctau0p60g_v3/"
+#path1 = "/afs/desy.de/user/h/hezhiyua/private/qcd_vs_ctau0p60g_v3/"
+path1 = "/afs/desy.de/user/h/hezhiyua/private/vbf_vs_zh40g0mm_v1/"
 #path0 = "D:\\py_tests\\sec_data\\RecoStudies_ntuples_v2\\"
 #path1 = "D:\\py_tests\\plots\\"
 #path0 = "/afs/desy.de/user/h/hezhiyua/private/sec_data/60GeV/"
@@ -21,22 +22,26 @@ channel = {
            #'vbfct100p60g':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-100_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC.root'	   
           }
 """
+
 channel = {
-           'vbfHToBB':'VBFHToBB_M-125_13TeV_powheg_pythia8.root',
-           'vbfct0p60g':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root'   	   
+           #'vbfHToBB':'VBFHToBB_M-125_13TeV_powheg_pythia8.root',
+           #'vbfct0p60g':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root'
+           'zhct0p40g':'ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
+   	   'vbfHToBB':'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
           }
 
 twoD = 0 # 2D plot option: 0 --> 1D
 CHS = 0 # CHS jet option: 0 --> off
 number_of_bin = 100
 num_of_jets = 1
-attr = ['pt']
+#attr = ['pt']
 #attr = ['chm','cm']
 #attr = ['CSV', 'chf']
 #attr = ['chf','chm','cm','pt']
 #attr = ['dR_q1','dR_q2','dR_q3','dR_q4']
 #attr = ['pt', 'nhf', 'phf', 'elf', 'muf']
 #attr = ['pt', 'eta', 'phi', 'CSV', 'chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
+attr = ['pt','chf','nm','phf']
 
 ####################################generating list with 10 Jets
 def jet_list_gen(n):
@@ -54,7 +59,8 @@ jet = jet_list_gen(num_of_jets)
 ########################################################################
 def cut_dict_gen(cut_name):
     cut_dict = {}
-    cut_dict['pt'] =  '(' + cut_name + 'pt' + '>' + '15' + ')'
+    cut_dict['pt'] =  '(' + cut_name + 'pt' + '>' + '15' + ')' # + '&&' + '(' + cut_name + 'pt' + '>' + '70' + ')' + '&&' + '(' + cut_name + 'pt' + '<' + '75' + ')'  
+       
     cut_dict['eta'] = '(' + cut_name + 'eta' + '<' + '2.4' + ')' + '&&' + '(' + cut_name + 'eta' + '>' + '-2.4' + ')'
     cut_dict['dR'] = '(' + cut_name + 'dR_q1' + '<' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q2'+ '>=' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q3'+ '>=' + '0.4' + ')' + '&&' + '(' + cut_name + 'dR_q4'+ '>=' + '0.4' + ')'
     cut_dict['chf'] = ''
@@ -123,6 +129,11 @@ def write_1(var,sample,cuts):
             color1 = 3
         elif sample == 'vbfct100p60g':
             color1 = 3
+
+        elif sample == 'zhct0p40g':
+            color1 = 3
+
+
 
         if s == 'pt':
             h_par = [number_of_bin,0,300]
@@ -251,9 +262,11 @@ for cc in channel:
 #===========================================================================================
 #===========================================================================================
 
-
-
-
+"""
+if ct_dep == 1:
+    life_time = []
+    
+"""
 
 
 
