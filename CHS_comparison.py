@@ -112,11 +112,11 @@ for cc in channel:
 def write_1(var,sample,cuts):
     for s in attr:
         if sample == 'qcd':
-            color1 = 4
+            color1 = 3
         elif sample == 'ttt':
-            color1 = 880+1 #400+3	
+            color1 = 2  #880+1 #400+3	
         elif sample == 'ct0':
-            color1 = 8 #634
+            color1 = 8  #634
         elif sample == 'ct0p05':
             color1 = 3
         elif sample == 'ct1':
@@ -124,7 +124,7 @@ def write_1(var,sample,cuts):
         elif sample == 'ct100':
             color1 = 6	
         elif sample == 'vbfHToBB':
-            color1 = 800+10
+            color1 = 7  #800+10
         elif sample == 'vbfct0p':
             color1 = 3
         elif sample == 'vbfct1p':
