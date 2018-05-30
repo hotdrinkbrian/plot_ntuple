@@ -6,8 +6,10 @@ from timeit import default_timer as timer
 start= timer()
 #####################Settings#####################################################################################
 gStyle.SetOptStat(0)
-path0 = "/nfs/dust/cms/user/lbenato/RecoStudies_ntuples_v3/"
-path1 = "/afs/desy.de/user/h/hezhiyua/private/qcd_vs_ctau0p60g_v3/"
+path0 = "/nfs/dust/cms/user/lbenato/RecoStudies_ntuples_v4/"
+
+#path1 = "/afs/desy.de/user/h/hezhiyua/private/qcd_vs_ctau0p60g_v3/"
+path1 = "/afs/desy.de/user/h/hezhiyua/private/vbf_vs_zh40g0mm_v1/"
 #path0 = "D:\\py_tests\\sec_data\\RecoStudies_ntuples_v2\\"
 #path1 = "D:\\py_tests\\plots\\"
 #path0 = "/afs/desy.de/user/h/hezhiyua/private/sec_data/60GeV/"
@@ -26,6 +28,7 @@ channel = {
            'ttt':'TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root',
            'vbfHToBB':'VBFHToBB_M-125_13TeV_powheg_pythia8.root',
            'vbfct0p60g':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root'   	   
+           #'zhct0p40g':'ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root' 
           }
 
 
@@ -36,6 +39,7 @@ number_of_bin = 100
 num_of_jets = 1
 #attr = ['pt', 'eta', 'phi', 'CSV', 'chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
 attr = ['nPV']
+#attr = ['chf', 'nhf', 'nPV', 'elf', 'muf', 'chm', 'cm', 'nm']
 
 cut_dR = []
 cut_eta = []
@@ -119,6 +123,9 @@ def write_1(var,sample):
         elif sample == 'vbfct100p60g':
             color1 = 3
 
+        elif sample == 'zhct0p40g':
+            color1 = 3
+
         if s == 'pt':
             h_par = [number_of_bin,0,300]
         elif s == 'eta':
@@ -194,10 +201,10 @@ def write_1(var,sample):
         #hist[sample][s].GetYaxis().SetTitleOffset(1.6)		
         if s == 'elf':
             hist[sample][s].SetAxisRange(0., 0.02,"Y")
-            hist_CHS[sample][s].SetAxisRange(0., 0.02,"Y")
+            #hist_CHS[sample][s].SetAxisRange(0., 0.02,"Y")
         elif s == 'muf':
             hist[sample][s].SetAxisRange(0., 0.02,"Y")  
-            hist_CHS[sample][s].SetAxisRange(0., 0.02,"Y")      			
+            #hist_CHS[sample][s].SetAxisRange(0., 0.02,"Y")      			
         print( hist[sample][s].GetEntries() )
 
 ##########################################################
