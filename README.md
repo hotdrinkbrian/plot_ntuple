@@ -1,2 +1,2 @@
 # plot_ntuple
-plotting root ntuples
+macros to test and plot root ntuples
