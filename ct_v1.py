@@ -7,17 +7,19 @@ from timeit import default_timer as timer
 start= timer()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Settings~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 gStyle.SetOptStat(0)
-path0 = "/nfs/dust/cms/user/lbenato/RecoStudies_ntuples_v3/"
+path0 = "/nfs/dust/cms/user/lbenato/RecoStudies_ntuples_v4/"
 #path1 = "/afs/desy.de/user/h/hezhiyua/private/qcd_vs_ctau0p60g_v3/"
-path1 = "/afs/desy.de/user/h/hezhiyua/private/vbf_vs_zh40g0mm_v1/"
+path1 = "/afs/desy.de/user/h/hezhiyua/private/qcd_vs_vbf40g_v4/"
 #path0 = "D:\\py_tests\\sec_data\\RecoStudies_ntuples_v2\\"
 #path1 = "D:\\py_tests\\plots\\"
 #path0 = "/afs/desy.de/user/h/hezhiyua/private/sec_data/60GeV/"
 #path1 = "/afs/desy.de/user/h/hezhiyua/public/qcd_vs_ctau0_vs_ctau100_ms60/"
 #CHS_comparison = 0 #1 for non_CHS and CHS comparison
 ct_dep = 1 #1 for ct dependence comparison
-life_time = ['0','0p05','1','10','100','1000','10000']
-life_time_float = [0.001,0.05,1,10,100,1000,10000]
+life_time = ['0','0p1','1','10','100']
+life_time_float = [0.001,0.1,1,10,100]
+#life_time = ['0','0p05','1','10','100','1000','10000']
+#life_time_float = [0.001,0.05,1,10,100,1000,10000]
 len_of_lt = len(life_time)
 
 if ct_dep == 0:
@@ -30,8 +32,8 @@ if ct_dep == 0:
 elif ct_dep == 1:
     channel = {}
     for lt in life_time:
-        channel['ct' + lt] = 'ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-' + lt + '_TuneCUETP8M1_13TeV-powheg-pythia8.root'
-    channel['qcd'] = 'QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root'
+        channel['ct' + lt] = '/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-' + lt + '_TuneCUETP8M1_13TeV-powheg-pythia8.root'
+    channel['qcd'] = '/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root'
     #channel['qcd'] = 'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
 
 
@@ -45,9 +47,9 @@ num_of_jets = 1
 #attr = ['chf','chm','cm','pt']
 #attr = ['dR_q1','dR_q2','dR_q3','dR_q4']
 #attr = ['pt', 'nhf', 'phf', 'elf', 'muf']
-#attr = ['pt', 'eta', 'phi', 'CSV', 'chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
+attr = ['pt', 'eta', 'phi', 'CSV', 'chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
 #attr = ['pt','chf','nm','phf']
-attr = ['chf']
+#attr = ['cm']
 
 ####################################generating list with 10 Jets
 def jet_list_gen(n):
@@ -87,6 +89,9 @@ cutting_CHS = cutting_gen('CHS')
 print('---------cut_CHS:')
 print(cutting_CHS)
 #++++++++++++++++++++++++++++cuts+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
+legends = 'vbf'
+legendb = 'qcd_200-300GeV'
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Settings~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -281,7 +286,7 @@ def plot_2(var,cuts):
             for cc in channel:
                 hist[cc][s].Draw('colz same')
                 hist_CHS[cc][s].Draw('colz same')
-            legend = TLegend(0.89, 0.89, 0.99, 0.99)
+            legend = TLegend(0.90, 0.90, 0.99, 0.99)
             #legend.SetHeader('Samples')
             for cc in channel:
                 legend.AddEntry(hist[cc][s],cc)
@@ -319,8 +324,8 @@ def plot_2(var,cuts):
             #gr1.GetYaxis().SetTitle('mean frequency')
             gr1.Draw('CP')  # '' sets up the scattering style
             legend = TLegend(0.89, 0.89, 0.99, 0.99)
-            legend.AddEntry('qcd','qcd_200-300GeV')
-            legend.AddEntry('sgn','ZH')
+            legend.AddEntry('qcd',legendb)
+            legend.AddEntry('sgn',legends)
             legend.Draw()
             c1.Print(path1 + 'mean_' + s + var + cuts.replace('(','_').replace(')','_').replace('&&','A').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
             c1.Update()
