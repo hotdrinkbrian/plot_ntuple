@@ -205,7 +205,7 @@ def write_1(var,sample,cuts):
         entr = tree[sample].GetEntries(cuts)
         hist[sample][s].SetLineColor(color1)
         hist[sample][s].SetLineWidth(3)
-        hist[sample][s].SetTitle('cut: ' + cuts.replace('(','_').replace(')','_').replace('&&',',').replace('Jet','J').replace('GenBquark','GBQ') + '[entries:' + str(entr) + ']')
+        hist[sample][s].SetTitle('cut(jet1): ' + cuts.replace('(','').replace(')','').replace('&&',';').replace('Jet1.','').replace('GenBquark','GBQ').replace('<=','\leq').replace('phi','\phi').replace('>=','\geq') + '[entries:' + str(entr) + ']')
         hist_CHS[sample][s].SetLineColor(color1+44)
         hist_CHS[sample][s].SetLineWidth(3)
         #hist[sample][s].SetTitleSize(0.4,'t')
@@ -220,6 +220,8 @@ def write_1(var,sample,cuts):
 def plot_2(var,cuts):
     for s in attr:
         c1 = TCanvas("c1", "Signals", 800, 800)
+        c1.SetTopMargin(0.2)
+        c1.SetLeftMargin(0.12)
         c1.cd()
         c1.SetGrid()
         #gStyle.SetTitleFontSize(8.1)
@@ -230,7 +232,7 @@ def plot_2(var,cuts):
             hist[cc][s].Draw('colz same')
             if CHS == 1:
                 hist_CHS[cc][s].Draw('colz same')
-        legend = TLegend(0.90, 0.90, 0.99, 0.99)
+        legend = TLegend(0.76, 0.76, 0.99, 0.99)
         #legend.SetHeader('Samples')
         for cc in channel:
             legend.AddEntry(hist[cc][s],cc)
@@ -256,11 +258,16 @@ def clear_hist(sample):
 
 ########################################################################
 def set_hist_yrange():
-    os = 1.14
+    os = 1.2
     for cc in channel:
         for s in attr:
             hist[cc][s].SetMaximum( plotrange[s] * os )
             hist_CHS[cc][s].SetMaximum( plotrange[s] *os )
+            hist[cc][s].GetYaxis().SetTitleOffset(1.4)
+            hist_CHS[cc][s].GetYaxis().SetTitleOffset(1.4)
+            hist[cc][s].GetYaxis().SetTitle('normalized number of events')
+            hist_CHS[cc][s].GetYaxis().SetTitleOffset(1.4)
+            hist_CHS[cc][s].GetYaxis().SetTitle('normalized number of events')
             if s == 'elf':
                 hist[cc][s].SetAxisRange(0., 0.02,"Y")
                 hist_CHS[cc][s].SetAxisRange(0., 0.02,"Y")
