@@ -79,6 +79,11 @@ def cutting_gen(pref):
     return cuttings
 ###################################################################################################
 cutting = cutting_gen('')
+
+entry = {'entries': ''}
+
+cut_str = 'cut(jet1): ' + cutting.replace('(','').replace(')','').replace('&&','&').replace('Jet1.','').replace('GenBquark','GBQ').replace('<=','leq').replace('phi','phi').replace('>=','geq') 
+
 print('---------cut:')
 print(cutting)
 cutting_CHS = cutting_gen('CHS')
@@ -203,13 +208,16 @@ def write_1(var,sample,cuts):
         else:
             print("zero denominator!")
         entr = tree[sample].GetEntries(cuts)
+
+        entry['entries'] = '[entries:' + str(entr) + ']'
+
         hist[sample][s].SetLineColor(color1)
         hist[sample][s].SetLineWidth(3)
-        hist[sample][s].SetTitle('cut(jet1): ' + cuts.replace('(','').replace(')','').replace('&&','&').replace('Jet1.','').replace('GenBquark','GBQ').replace('<=','\leq').replace('phi','\phi').replace('>=','\geq') + '[entries:' + str(entr) + ']')
+        hist[sample][s].SetTitle( s )
         hist_CHS[sample][s].SetLineColor(color1+44)
         hist_CHS[sample][s].SetLineWidth(3)
         #hist[sample][s].SetTitleSize(0.4,'t')
-        #hist[sample][s].GetYaxis().SetTitleOffset(1.6)	
+        
         	
         plotrange[s] =  max( plotrange[s] , hist[sample][s].GetMaximum() )
         print( 'Entries:' )  			
@@ -220,12 +228,12 @@ def write_1(var,sample,cuts):
 def plot_2(var,cuts):
     for s in attr:
         c1 = TCanvas("c1", "Signals", 800, 800)
-        c1.SetTopMargin(0.2)
+        c1.SetTopMargin(0.12)
         c1.SetLeftMargin(0.12)
         c1.SetRightMargin(0.24)
         c1.cd()
         c1.SetGrid()
-        #gStyle.SetTitleFontSize(8.1)
+        gStyle.SetTitleFontSize(0.08)
         if s in ('elf', 'muf', 'chm', 'cm', 'nm'):
             c1.SetLogx()
         for cc in channel:
@@ -234,7 +242,7 @@ def plot_2(var,cuts):
             if CHS == 1:
                 hist_CHS[cc][s].Draw('colz same')
         legend = TLegend(0.76, 0.46, 0.99, 0.80)
-        #legend.SetHeader('Samples')
+        legend.SetHeader( entry['entries'] )
         for cc in channel:
             legend.AddEntry(hist[cc][s],cc)
             if CHS == 1:
@@ -259,16 +267,19 @@ def clear_hist(sample):
 
 ########################################################################
 def set_hist_yrange():
-    os = 1.2
+    os = 1.17
     for cc in channel:
         for s in attr:
             hist[cc][s].SetMaximum( plotrange[s] * os )
             hist_CHS[cc][s].SetMaximum( plotrange[s] *os )
+
             hist[cc][s].GetYaxis().SetTitleOffset(1.6)
-            #hist_CHS[cc][s].GetYaxis().SetTitleOffset(1.6)
             hist[cc][s].GetYaxis().SetTitle('normalized number of events')
+            hist[cc][s].GetXaxis().SetTitle(cut_str)
+            
             hist_CHS[cc][s].GetYaxis().SetTitleOffset(1.6)
             hist_CHS[cc][s].GetYaxis().SetTitle('normalized number of events')
+            hist_CHS[cc][s].GetXaxis().SetTitle(cut_str)
             if s == 'elf':
                 hist[cc][s].SetAxisRange(0., 0.02,"Y")
                 hist_CHS[cc][s].SetAxisRange(0., 0.02,"Y")
