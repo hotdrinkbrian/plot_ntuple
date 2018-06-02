@@ -25,12 +25,12 @@ channel = {
 """
 
 channel = {
-           'ttt':'TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root',
-           'qcd':'QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root',
+           #'ttt':'TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root',
+           #'qcd':'QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root',
            #'vbfct0p60g':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
-           'vbfct0p40g':'VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
-           #'zhct0p40g':'ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
-   	   'vbfHToBB':'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
+           #'vbfct0p40g':'VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
+           'zhct0p40g':'ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
+   	       #'vbfHToBB':'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
           }
 
 twoD = 0 # 2D plot option: 0 --> 1D
@@ -44,9 +44,9 @@ num_of_jets = 1
 #attr = ['dR_q1','dR_q2','dR_q3','dR_q4']
 #attr = ['pt', 'nhf', 'phf', 'elf', 'muf']
 #attr = ['pt', 'eta', 'phi', 'CSV', 'chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
-attr = ['pt', 'CSV', 'chf', 'nhf', 'phf', 'chm', 'cm', 'nm']
+#attr = ['pt', 'CSV', 'chf', 'nhf', 'phf', 'chm', 'cm', 'nm']
 #attr = ['pt','chf','nm','phf']
-#attr = ['nhf']
+attr = ['nhf']
 
 ####################################generating list with 10 Jets
 def jet_list_gen(n):
@@ -81,15 +81,35 @@ def cutting_gen(pref):
 ###################################################################################################
 cutting = cutting_gen('')
 
-entry = {'entries': ''}
-
-cut_str = 'cut(jet1): ' + cutting.replace('(','').replace(')','').replace('&&','&').replace('Jet1.','').replace('GenBquark','GBQ').replace('<=','leq').replace('phi','phi').replace('>=','geq') 
+###################################################################################################
+def cut_tex_gen(cut):
+    cut_str = cut.replace('(','').replace(')','').replace('&&','&').replace('<=','#leq').replace('phi','#phi').replace('eta','#eta').replace('>=','#geq') 
+    #cut_str = cut_str.replace('Jet1.','') #.replace('GenBquark','GBQ')
+    cut_str_list = cut_str.split('&')
+    ct_text = {}
+    w = 0
+    for ct in enumerate(cut_str_list):
+        ct_text[ct[0]] = TLatex(.78, .52 - 0.04*w, ct[1])
+        ct_text[ct[0]].SetNDC()
+        ct_text[ct[0]].SetTextSize(0.03)
+        #ct_text[ct[0]].SetTextFont(1)
+        #ct_text[ct[0]].SetTextColor(1)
+        #ct_text[ct[0]].SetTextAlign(22)
+        #ct_text[ct[0]].SetTextAngle(0)
+        #ct_text[ct[0]].DrawText(0.5, 0.4, "x")
+        #ct_text[ct[0]].Draw()
+        w += 1
+    return ct_text    
+###################################################################################################
+cut_text = cut_tex_gen(cutting)  
 
 print('---------cut:')
 print(cutting)
 cutting_CHS = cutting_gen('CHS')
 print('---------cut_CHS:')
 print(cutting_CHS)
+
+entry = {'entries': ''}
 #++++++++++++++++++++++++++++cuts+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Settings~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -228,7 +248,7 @@ def write_1(var,sample,cuts):
 ##########################################################
 def plot_2(var,cuts):
     for s in attr:
-        c1 = TCanvas("c1", "Signals", 800, 800)
+        c1 = TCanvas("c1", "Signals", 1200, 800)
         c1.SetTopMargin(0.12)
         c1.SetLeftMargin(0.14)
         c1.SetRightMargin(0.24)
@@ -249,24 +269,13 @@ def plot_2(var,cuts):
             if CHS == 1:
                 legend.AddEntry(hist_CHS[cc][s],cc + 'CHS')
         legend.Draw()
+        
+        
+        for ct in enumerate(cut_text):
+            cut_text[ct[0]].Draw()
+    
+        
         c1.Print(path1 + s + var + cuts.replace('(','_').replace(')','_').replace('&&','A').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
-        
-        """
-        title = TPaveLabel(0.4, -0.04, 0.6, -0.08, cut_str )
-        title.SetFillColor(16)
-        title.Draw()
-        """
-        xlabel = TLatex(.78, .52, "cut")
-        xlabel.SetNDC()
-        xlabel.SetTextSize(0.03)
-        xlabel.Draw()
-        #xlabel.SetTextFont(1)
-        #xlabel.SetTextColor(1)
-        #xlabel.SetTextAlign(22)
-        #xlabel.SetTextAngle(0)
-        #xlabel.DrawText(0.5, 0.4, "Ca")
-        
-        
         c1.Update()
         c1.Close() 
         print('|||||||||||||||||||||||||||||||||||||||||||||||||||')
