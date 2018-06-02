@@ -1,5 +1,6 @@
 from __future__ import division
 from ROOT import ROOT, TDirectory, TFile, gFile, TBranch, TLeaf, TTree, TH1, TH1F, TH2F, TChain, TCanvas, TLegend, gROOT, gStyle
+from ROOT import TText, TPaveLabel, TLatex
 import math
 from timeit import default_timer as timer
 
@@ -229,7 +230,7 @@ def plot_2(var,cuts):
     for s in attr:
         c1 = TCanvas("c1", "Signals", 800, 800)
         c1.SetTopMargin(0.12)
-        c1.SetLeftMargin(0.12)
+        c1.SetLeftMargin(0.14)
         c1.SetRightMargin(0.24)
         c1.cd()
         c1.SetGrid()
@@ -241,7 +242,7 @@ def plot_2(var,cuts):
             hist[cc][s].Draw('colz same')
             if CHS == 1:
                 hist_CHS[cc][s].Draw('colz same')
-        legend = TLegend(0.76, 0.46, 0.99, 0.80)
+        legend = TLegend(0.76, 0.56, 0.99, 0.88)
         legend.SetHeader( entry['entries'] )
         for cc in channel:
             legend.AddEntry(hist[cc][s],cc)
@@ -249,6 +250,23 @@ def plot_2(var,cuts):
                 legend.AddEntry(hist_CHS[cc][s],cc + 'CHS')
         legend.Draw()
         c1.Print(path1 + s + var + cuts.replace('(','_').replace(')','_').replace('&&','A').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
+        
+        """
+        title = TPaveLabel(0.4, -0.04, 0.6, -0.08, cut_str )
+        title.SetFillColor(16)
+        title.Draw()
+        """
+        xlabel = TLatex(.78, .52, "cut")
+        xlabel.SetNDC()
+        xlabel.SetTextSize(0.03)
+        xlabel.Draw()
+        #xlabel.SetTextFont(1)
+        #xlabel.SetTextColor(1)
+        #xlabel.SetTextAlign(22)
+        #xlabel.SetTextAngle(0)
+        #xlabel.DrawText(0.5, 0.4, "Ca")
+        
+        
         c1.Update()
         c1.Close() 
         print('|||||||||||||||||||||||||||||||||||||||||||||||||||')
@@ -275,11 +293,11 @@ def set_hist_yrange():
 
             hist[cc][s].GetYaxis().SetTitleOffset(1.6)
             hist[cc][s].GetYaxis().SetTitle('normalized number of events')
-            hist[cc][s].GetXaxis().SetTitle(cut_str)
+            hist[cc][s].GetXaxis().SetTitle( s )
             
-            hist_CHS[cc][s].GetYaxis().SetTitleOffset(1.6)
+            hist_CHS[cc][s].GetYaxis().SetTitleOffset(2.8)
             hist_CHS[cc][s].GetYaxis().SetTitle('normalized number of events')
-            hist_CHS[cc][s].GetXaxis().SetTitle(cut_str)
+            hist_CHS[cc][s].GetXaxis().SetTitle( s )
             if s == 'elf':
                 hist[cc][s].SetAxisRange(0., 0.02,"Y")
                 hist_CHS[cc][s].SetAxisRange(0., 0.02,"Y")
