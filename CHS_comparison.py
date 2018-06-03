@@ -40,10 +40,8 @@ twoD = 0 # 2D plot option: 0 --> 1D
 CHS = 0 # CHS jet option: 0 --> off
 number_of_bin = 100
 num_of_jets = 1
-life_time = ['0','0p1','1','10','100']
-life_time_float = [0.001,0.1,1,10,100]
-#life_time = ['0','0p05','1','10','100','1000','10000']
-#life_time_float = [0.001,0.05,1,10,100,1000,10000]
+life_time = ['0','0p05','1','10','100','1000','10000']
+life_time_float = [0.001,0.05,1,10,100,1000,10000]
 len_of_lt = len(life_time)
 
 if ct_dep == 0:
@@ -61,8 +59,8 @@ elif ct_dep == 1:
         channel['ct' + lt] = '/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-' + lt + '_TuneCUETP8M1_13TeV-powheg-pythia8.root'
     channel['qcd'] = '/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root'
     #channel['qcd'] = 'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
-    legends = 'Signal(VBF)'
-    legendb = 'Background(QCD_200-300GeV)'
+    legends = 'SGN(VBF)'
+    legendb = 'BKG(QCD)'
 
 #attr = ['pt']
 #attr = ['chm','cm']
@@ -74,6 +72,7 @@ elif ct_dep == 1:
 #attr = ['pt', 'CSV', 'chf', 'nhf', 'phf', 'chm', 'cm', 'nm']
 #attr = ['pt','chf','nm','phf']
 attr = ['nhf']
+attr_dict = {'pt':'Transverse Momentum', 'eta':'#eta', 'phi':'#phi', 'CSV':'Combined Secondary Vertex', 'chf':'Charged Hadron Fraction', 'nhf':'Neutral Hadron Fraction', 'phf':'Photon Fraction', 'elf':'Electron Fraction', 'muf':'Muon Fraction', 'chm':'Charged Hadron Multiplicity', 'cm':'Charged Multiplicity', 'nm':'Neutral Multiplicity'}
 
 ####################################generating list with 10 Jets
 def jet_list_gen(n):
@@ -322,6 +321,7 @@ def write_1(var,sample,cuts):
         elif twoD == 1:
             hist[sample][s] = TH2F(sample+s, '; %s; events' %s , h_par[0], h_par[1], h_par[2] , number_of_bin, 0, 300)
             hist_CHS[sample][s] = TH2F(sample+s +'CHS', '; %s; events' %s , h_par[0], h_par[1], h_par[2] , number_of_bin, 0, 300)
+        print( 'loading TTree:' )    
         print( tree[sample] )
         hist[sample][s].Sumw2()
         hist_CHS[sample][s].Sumw2()
@@ -332,12 +332,17 @@ def write_1(var,sample,cuts):
         elif twoD == 1:
             tree[sample].Project(sample+s, var + '.' + s + ':' + var + '.' + 'pt', cuts ) 
             tree[sample].Project(sample+s+'CHS', 'CHS' + var + '.' + s + ':' + var + '.' + 'pt', cuts + '_CHS' )              
-
-        if hist[sample][s].Integral() != 0 and hist_CHS[sample][s].Integral() != 0:
-            hist[sample][s].Scale(1/float(hist[sample][s].Integral()))
-            hist_CHS[sample][s].Scale(1/float(hist_CHS[sample][s].Integral()))   
+        
+        normalizationFactor = float(hist[sample][s].Integral())
+        normalizationFactor_CHS = float(hist_CHS[sample][s].Integral())
+        if normalizationFactor != 0 and normalizationFactor_CHS != 0:
+            normalizationFactor = 1 / normalizationFactor
+            normalizationFactor_CHS = 1 / normalizationFactor_CHS
+            hist[sample][s].Scale( 1 / normalizationFactor )
+            hist_CHS[sample][s].Scale( 1 / normalizationFactor_CHS )   
         else:
             print("zero denominator!")
+
         entr = tree[sample].GetEntries(cuts)
 
         """
@@ -354,14 +359,14 @@ def write_1(var,sample,cuts):
         """
         
         if ct_dep == 0:
-            plotrange[s] =  max( plotrange[s] , hist[sample][s].GetMaximum() )
             entry['entries'] = '[entries:' + str(entr) + ']'
             hist[sample][s].SetLineColor(color1)
             hist[sample][s].SetLineWidth(3)
-            hist[sample][s].SetTitle( s )
+            hist[sample][s].SetTitle( attr_dict[s] )
             hist_CHS[sample][s].SetLineColor(color1+44)
             hist_CHS[sample][s].SetLineWidth(3)
             #hist[sample][s].SetTitleSize(0.4,'t')  
+            plotrange[s] =  max( plotrange[s] , hist[sample][s].GetMaximum() + hist[sample][s].GetRMS() * normalizationFactor )
             print( 'Entries:' )  			
             print( hist[sample][s].GetEntries() )
         elif ct_dep == 1:
@@ -369,6 +374,7 @@ def write_1(var,sample,cuts):
             errors[sample][s] = hist[sample][s].GetStdDev() #saving errors of the histogram
             #errors[sample][s] = hist[sample][s].GetRMS()
             mean[sample][s] = hist[sample][s].GetMean()     #saving means of the histogram
+            plotrange[s] =  max( plotrange[s] , mean[sample][s] + hist[sample][s].GetRMS() )
 ####################################################################################################################
 
 ###########################################################################
@@ -429,6 +435,7 @@ def plot_2(var,cuts):
             gr.GetXaxis().SetTitle('decaying length (mm)')
             gr.GetYaxis().SetTitle('mean normalized number of events')
             gr.GetXaxis().SetTitleOffset(1.4)
+            gr.SetMaximum( plotrange[s] * 1.12 )
             gr.SetName('sgn')
             gr.Draw('ACP')  # '' sets up the scattering style
             gr1 = TGraphErrors( len_of_lt , x , yy['qcd'][s] , ex , ey['qcd'][s] )
@@ -468,7 +475,7 @@ def clear_hist(sample):
 
 ########################################################################
 def set_hist_yrange():
-    os = 1.17
+    os = 1.15
     for cc in channel:
         for s in attr:
             hist[cc][s].SetMaximum( plotrange[s] * os )
@@ -497,22 +504,15 @@ def init_plotrange():
 
 #===========================================================================================
 #===========================================================================================
+init_plotrange()
 if ct_dep == 0:
-    for i in jet:
-
-        init_plotrange()       
-
+    for i in jet:    
         for cc in channel:
             write_1(i,cc,cutting)
 
         set_hist_yrange()
         plot_2(i,cutting)
 
-        plotrange.clear()
-        for cc in channel:
-            clear_hist(cc) 
-            hist[cc].clear()
-            tree.clear() 
 elif ct_dep == 1:
     for i in jet:
         for cc in channel:
@@ -520,10 +520,12 @@ elif ct_dep == 1:
         write_2('qcd')
         write_2('sgn')
         plot_2(i,cutting)
-        for cc in channel:
-            clear_hist(cc) 
-            hist[cc].clear()
-            tree.clear()   
+
+plotrange.clear()
+for cc in channel:
+    clear_hist(cc) 
+    hist[cc].clear()
+    tree.clear()
 
 for cc in channel:
         file_dict[cc].Close()
