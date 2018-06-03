@@ -15,25 +15,7 @@ path1 = "/afs/desy.de/user/h/hezhiyua/private/vbf_vs_zh40g0mm_v1/"
 #path0 = "D:\\py_tests\\sec_data\\RecoStudies_ntuples_v2\\"
 #path1 = "D:\\py_tests\\plots\\"
 #path0 = "/afs/desy.de/user/h/hezhiyua/private/sec_data/60GeV/"
-#path1 = "/afs/desy.de/user/h/hezhiyua/public/qcd_vs_ctau0_vs_ctau100_ms60/"
-"""
-channel = {
-           #'qcd':'QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root',
-           #'ttt':'TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root',
-           'vbfHToBB':'VBFHToBB_M-125_13TeV_powheg_pythia8.root',
-           'vbfct0p60g':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC.root'
-           #'vbfct100p60g':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-100_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC.root'	   
-          }
-
-channel = {
-           #'ttt':'TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root',
-           #'qcd':'QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root',
-           #'vbfct0p60g':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
-           #'vbfct0p40g':'VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
-           'zhct0p40g':'ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
-   	       #'vbfHToBB':'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
-          }
-"""          
+#path1 = "/afs/desy.de/user/h/hezhiyua/public/qcd_vs_ctau0_vs_ctau100_ms60/"      
 
 ct_dep = 1 #1 for ct dependence comparison
 twoD = 0 # 2D plot option: 0 --> 1D
@@ -46,31 +28,23 @@ len_of_lt = len(life_time)
 
 if ct_dep == 0:
     channel = {
-           #'ttt':'TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root',
-           #'qcd':'QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root',
-           #'vbfct0p60g':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
-           #'vbfct0p40g':'VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
-           'zhct0p40g':'ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
-   	       #'vbfHToBB':'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
+           #'TTbar':'TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root',
+           #'QCD':'QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root',
+           #'VBFct0p60g':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
+           #'VBFct0p40g':'VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
+           'ZHct0p40g':'ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
+   	       #'HToBB':'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
           }
 elif ct_dep == 1:
     channel = {}
     for lt in life_time:
         channel['ct' + lt] = '/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-' + lt + '_TuneCUETP8M1_13TeV-powheg-pythia8.root'
-    channel['qcd'] = '/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root'
-    #channel['qcd'] = 'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
+    channel['QCD'] = '/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root'
     legends = 'SGN(VBF)'
     legendb = 'BKG(QCD)'
 
-#attr = ['pt']
-#attr = ['chm','cm']
-#attr = ['CSV', 'chf']
-#attr = ['chf','chm','cm','pt']
 #attr = ['dR_q1','dR_q2','dR_q3','dR_q4']
-#attr = ['pt', 'nhf', 'phf', 'elf', 'muf']
 #attr = ['pt', 'eta', 'phi', 'CSV', 'chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
-#attr = ['pt', 'CSV', 'chf', 'nhf', 'phf', 'chm', 'cm', 'nm']
-#attr = ['pt','chf','nm','phf']
 attr = ['nhf']
 attr_dict = {'pt':'Transverse Momentum', 'eta':'#eta', 'phi':'#phi', 'CSV':'Combined Secondary Vertex', 'chf':'Charged Hadron Fraction', 'nhf':'Neutral Hadron Fraction', 'phf':'Photon Fraction', 'elf':'Electron Fraction', 'muf':'Muon Fraction', 'chm':'Charged Hadron Multiplicity', 'cm':'Charged Multiplicity', 'nm':'Neutral Multiplicity'}
 
@@ -228,11 +202,11 @@ elif ct_dep == 1:
         errors[cc] ={}
         entries_after_cut[cc] ={}
     ##############################
-    entries_after_cut['qcd'] = {}
+    entries_after_cut['QCD'] = {}
     entries_after_cut['sgn'] = {}
-    yy['qcd'] ={} 
+    yy['QCD'] ={} 
     yy['sgn'] ={}       
-    ey['qcd'] ={} 
+    ey['QCD'] ={} 
     ey['sgn'] ={} 
     #######################################
     x = array( 'd' )        # array to plot for TGraph
@@ -246,36 +220,16 @@ elif ct_dep == 1:
 ####################################################################################################################
 def write_1(var,sample,cuts):
     for s in attr:
-        if sample == 'qcd':
-            color1 = 3
-        elif sample == 'ttt':
-            color1 = 2  #880+1 #400+3	
-        elif sample == 'ct0':
-            color1 = 8  #634
-        elif sample == 'ct0p05':
-            color1 = 3
-        elif sample == 'ct1':
-            color1 = 2
-        elif sample == 'ct100':
-            color1 = 6	
-        elif sample == 'vbfHToBB':
-            color1 = 7  #800+10
-        elif sample == 'vbfct0p':
-            color1 = 3
-        elif sample == 'vbfct1p':
-            color1 = 860
-        elif sample == 'vbfct100p':
-            color1 = 1	
-        elif sample == 'vbfct0p60g':
-            color1 = 3
-        elif sample == 'vbfct100p60g':
-            color1 = 3
-
-        elif sample == 'zhct0p40g':
-            color1 = 3
-        elif sample == 'vbfct0p40g':
-            color1 = 4 
-
+        if 'QCD' in sample:
+            color1 = 3                 #880+1 #400+3	6 8 634 1
+        elif 'TTbar' in sample:
+            color1 = 2  
+        elif 'HToBB' in sample:
+            color1 = 7                 #800+10 860
+        elif 'VBF' in sample:
+            color1 = 4
+        elif 'ZH' in sample:
+            color1 = 6
 
         if s == 'pt':
             h_par = [number_of_bin,0,300]
@@ -338,25 +292,12 @@ def write_1(var,sample,cuts):
         if normalizationFactor != 0 and normalizationFactor_CHS != 0:
             normalizationFactor = 1 / normalizationFactor
             normalizationFactor_CHS = 1 / normalizationFactor_CHS
-            hist[sample][s].Scale( 1 / normalizationFactor )
-            hist_CHS[sample][s].Scale( 1 / normalizationFactor_CHS )   
+            hist[sample][s].Scale( normalizationFactor )
+            hist_CHS[sample][s].Scale( normalizationFactor_CHS )   
         else:
             print("zero denominator!")
 
         entr = tree[sample].GetEntries(cuts)
-
-        """
-        entry['entries'] = '[entries:' + str(entr) + ']'
-        hist[sample][s].SetLineColor(color1)
-        hist[sample][s].SetLineWidth(3)
-        hist[sample][s].SetTitle( s )
-        hist_CHS[sample][s].SetLineColor(color1+44)
-        hist_CHS[sample][s].SetLineWidth(3)
-        #hist[sample][s].SetTitleSize(0.4,'t')
-        plotrange[s] =  max( plotrange[s] , hist[sample][s].GetMaximum() )
-        print( 'Entries:' )  			
-        print( hist[sample][s].GetEntries() )
-        """
         
         if ct_dep == 0:
             entry['entries'] = '[entries:' + str(entr) + ']'
@@ -384,9 +325,9 @@ def write_2(sample):
         yy[sample][s] = array( 'd' )     #declaring the yy array
         ey[sample][s] = array( 'd' )     #declaring the ey array    
         for ll in enumerate(life_time):
-            if sample == 'qcd':
-                yy[sample][s].append( mean['qcd'][s] )
-                ey[sample][s].append( errors['qcd'][s] )
+            if sample == 'QCD':
+                yy[sample][s].append( mean['QCD'][s] )
+                ey[sample][s].append( errors['QCD'][s] )
             else:
                 yy[sample][s].append( mean['ct'+ll[1]][s] )
                 ey[sample][s].append( errors['ct'+ll[1]][s] )
@@ -438,20 +379,20 @@ def plot_2(var,cuts):
             gr.SetMaximum( plotrange[s] * 1.12 )
             gr.SetName('sgn')
             gr.Draw('ACP')  # '' sets up the scattering style
-            gr1 = TGraphErrors( len_of_lt , x , yy['qcd'][s] , ex , ey['qcd'][s] )
+            gr1 = TGraphErrors( len_of_lt , x , yy['QCD'][s] , ex , ey['QCD'][s] )
             gr1.SetMarkerSize(1.0)
             gr1.SetMarkerStyle(1)
             gr.GetYaxis().SetTitleOffset(1.6)
             gr1.SetLineColor(2)
             gr1.SetLineWidth(2)
-            gr1.SetName('qcd')
+            gr1.SetName('QCD')
             #gr1.SetTitle('averaged ' + s)
             #gr1.GetXaxis().SetTitle('decaying length (mm)')
             #gr1.GetYaxis().SetTitle('mean frequency')
             gr1.Draw('CP')  # '' sets up the scattering style
             legend = TLegend(0.76, 0.56, 0.99, 0.88)
             legend.SetHeader( 'Entries: ' + eac0 )
-            legend.AddEntry('qcd',legendb)
+            legend.AddEntry('QCD',legendb)
             legend.AddEntry('sgn',legends)
             legend.Draw()
             for ct in cut_text:
@@ -517,7 +458,7 @@ elif ct_dep == 1:
     for i in jet:
         for cc in channel:
             write_1(i,cc,cutting)
-        write_2('qcd')
+        write_2('QCD')
         write_2('sgn')
         plot_2(i,cutting)
 
@@ -545,8 +486,8 @@ print("Time taken:", end-start)
 """
 ###########################################################
 def findDirName() 
-    #file_dict['qcd']
-    TIter next(file_dict['qcd'].GetListOfKeys())
+    #file_dict['QCD']
+    TIter next(file_dict['QCD'].GetListOfKeys())
     key = TKey
     while key = next():
         cl = TClass
