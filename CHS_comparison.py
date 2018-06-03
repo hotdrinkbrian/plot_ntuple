@@ -1,6 +1,8 @@
 from __future__ import division
-from ROOT import ROOT, TDirectory, TFile, gFile, TBranch, TLeaf, TTree, TH1, TH1F, TH2F, TChain, TCanvas, TLegend, gROOT, gStyle
-from ROOT import TText, TPaveLabel, TLatex
+from ROOT import ROOT, gROOT, TDirectory, TFile, gFile, TBranch, TLeaf, TTree
+from ROOT import TText, TPaveLabel, TLatex, TGraphErrors
+from ROOT import TH1, TH1F, TH2F, TChain, TCanvas, TLegend, gStyle
+from array import array
 import math
 from timeit import default_timer as timer
 
@@ -22,7 +24,6 @@ channel = {
            'vbfct0p60g':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC.root'
            #'vbfct100p60g':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-100_TuneCUETP8M1_13TeV-powheg-pythia8_PRIVATE-MC.root'	   
           }
-"""
 
 channel = {
            #'ttt':'TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root',
@@ -32,11 +33,37 @@ channel = {
            'zhct0p40g':'ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
    	       #'vbfHToBB':'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
           }
+"""          
 
+ct_dep = 1 #1 for ct dependence comparison
 twoD = 0 # 2D plot option: 0 --> 1D
 CHS = 0 # CHS jet option: 0 --> off
 number_of_bin = 100
 num_of_jets = 1
+life_time = ['0','0p1','1','10','100']
+life_time_float = [0.001,0.1,1,10,100]
+#life_time = ['0','0p05','1','10','100','1000','10000']
+#life_time_float = [0.001,0.05,1,10,100,1000,10000]
+len_of_lt = len(life_time)
+
+if ct_dep == 0:
+    channel = {
+           #'ttt':'TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root',
+           #'qcd':'QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root',
+           #'vbfct0p60g':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
+           #'vbfct0p40g':'VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
+           'zhct0p40g':'ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
+   	       #'vbfHToBB':'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
+          }
+elif ct_dep == 1:
+    channel = {}
+    for lt in life_time:
+        channel['ct' + lt] = '/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-' + lt + '_TuneCUETP8M1_13TeV-powheg-pythia8.root'
+    channel['qcd'] = '/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root'
+    #channel['qcd'] = 'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
+    legends = 'Signal(VBF)'
+    legendb = 'Background(QCD_200-300GeV)'
+
 #attr = ['pt']
 #attr = ['chm','cm']
 #attr = ['CSV', 'chf']
@@ -130,7 +157,7 @@ def cut_tex_gen(cut):
     for a in bound:    
         bound[a]['B'].append( max(bound[a]['LB']) ) 
         bound[a]['B'].append( min(bound[a]['UB']) )
-        print bound
+        #print bound
         if -inf == float( min(bound[a]['B']) ):
             bb = a + ' ' + bound[a]['syb'][0] + ' ' + str( max(bound[a]['B']) )
         elif inf is float( max(bound[a]['B']) ):    
@@ -182,11 +209,39 @@ plotrange = {}
 tree = {}
 hist = {}
 hist_CHS = {}
-##############################
-for cc in channel:
-    hist[cc] = {}
-    hist_CHS[cc] = {}
-##############################
+if ct_dep == 0:    
+    ##############################
+    for cc in channel:
+        hist[cc] = {}
+        hist_CHS[cc] = {}
+    ##############################
+elif ct_dep == 1:     
+    mean ={}        #dictionary to hold all mean values
+    errors ={}      #dictionary to hold all errors
+    entries_after_cut = {}
+    yy ={}          #dictionary to hold all arrays of y values for TGraph
+    ey ={}          #dictionary to hold all arrays of errors for TGraph
+    ##############################
+    for cc in channel:
+        hist[cc] = {}
+        hist_CHS[cc] = {} # to be opt
+        mean[cc] ={}
+        errors[cc] ={}
+        entries_after_cut[cc] ={}
+    ##############################
+    entries_after_cut['qcd'] = {}
+    entries_after_cut['sgn'] = {}
+    yy['qcd'] ={} 
+    yy['sgn'] ={}       
+    ey['qcd'] ={} 
+    ey['sgn'] ={} 
+    #######################################
+    x = array( 'd' )        # array to plot for TGraph
+    ex = array( 'd' )
+    for ll in life_time_float:
+        x.append( ll )
+        ex.append( 0.0  )
+    #######################################
 
 
 ####################################################################################################################
@@ -285,20 +340,51 @@ def write_1(var,sample,cuts):
             print("zero denominator!")
         entr = tree[sample].GetEntries(cuts)
 
+        """
         entry['entries'] = '[entries:' + str(entr) + ']'
-
         hist[sample][s].SetLineColor(color1)
         hist[sample][s].SetLineWidth(3)
         hist[sample][s].SetTitle( s )
         hist_CHS[sample][s].SetLineColor(color1+44)
         hist_CHS[sample][s].SetLineWidth(3)
         #hist[sample][s].SetTitleSize(0.4,'t')
-        
-        	
         plotrange[s] =  max( plotrange[s] , hist[sample][s].GetMaximum() )
         print( 'Entries:' )  			
         print( hist[sample][s].GetEntries() )
+        """
+        
+        if ct_dep == 0:
+            plotrange[s] =  max( plotrange[s] , hist[sample][s].GetMaximum() )
+            entry['entries'] = '[entries:' + str(entr) + ']'
+            hist[sample][s].SetLineColor(color1)
+            hist[sample][s].SetLineWidth(3)
+            hist[sample][s].SetTitle( s )
+            hist_CHS[sample][s].SetLineColor(color1+44)
+            hist_CHS[sample][s].SetLineWidth(3)
+            #hist[sample][s].SetTitleSize(0.4,'t')  
+            print( 'Entries:' )  			
+            print( hist[sample][s].GetEntries() )
+        elif ct_dep == 1:
+            entries_after_cut[sample][s] = tree[sample].GetEntries( cuts ) # to be optimized
+            errors[sample][s] = hist[sample][s].GetStdDev() #saving errors of the histogram
+            #errors[sample][s] = hist[sample][s].GetRMS()
+            mean[sample][s] = hist[sample][s].GetMean()     #saving means of the histogram
 ####################################################################################################################
+
+###########################################################################
+def write_2(sample):
+    #for cc in channel:
+    for s in attr:
+        yy[sample][s] = array( 'd' )     #declaring the yy array
+        ey[sample][s] = array( 'd' )     #declaring the ey array    
+        for ll in enumerate(life_time):
+            if sample == 'qcd':
+                yy[sample][s].append( mean['qcd'][s] )
+                ey[sample][s].append( errors['qcd'][s] )
+            else:
+                yy[sample][s].append( mean['ct'+ll[1]][s] )
+                ey[sample][s].append( errors['ct'+ll[1]][s] )
+###########################################################################
 
 ##########################################################
 def plot_2(var,cuts):
@@ -310,26 +396,63 @@ def plot_2(var,cuts):
         c1.cd()
         c1.SetGrid()
         gStyle.SetTitleFontSize(0.08)
-        if s in ('elf', 'muf', 'chm', 'cm', 'nm'):
+        if ct_dep == 0:
+            if s in ('elf', 'muf', 'chm', 'cm', 'nm'):
+                c1.SetLogx()
+            for cc in channel:
+                #hist[cc][s].SetMaximum(0.44)
+                hist[cc][s].Draw('colz same')
+                if CHS == 1:
+                    hist_CHS[cc][s].Draw('colz same')
+            legend = TLegend(0.76, 0.56, 0.99, 0.88)
+            legend.SetHeader( entry['entries'] )
+            for cc in channel:
+                legend.AddEntry(hist[cc][s],cc)
+                if CHS == 1:
+                    legend.AddEntry(hist_CHS[cc][s],cc + 'CHS')
+            legend.Draw()
+            for ct in cut_text:
+                cut_text[ct].Draw()
+            c1.Print(path1 + s + var + cuts.replace('(','_').replace(')','_').replace('&&','A').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
+            
+        elif ct_dep == 1:
+            eac0 = str( entries_after_cut['ct0'][s] )
             c1.SetLogx()
-        for cc in channel:
-            #hist[cc][s].SetMaximum(0.44)
-            hist[cc][s].Draw('colz same')
-            if CHS == 1:
-                hist_CHS[cc][s].Draw('colz same')
-        legend = TLegend(0.76, 0.56, 0.99, 0.88)
-        legend.SetHeader( entry['entries'] )
-        for cc in channel:
-            legend.AddEntry(hist[cc][s],cc)
-            if CHS == 1:
-                legend.AddEntry(hist_CHS[cc][s],cc + 'CHS')
-        legend.Draw()
-        for ct in cut_text:
-            cut_text[ct].Draw()
-        c1.Print(path1 + s + var + cuts.replace('(','_').replace(')','_').replace('&&','A').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
+            #gr = TGraph( len_of_lt , x , yy['sgn'][s] )
+            gr = TGraphErrors( len_of_lt , x , yy['sgn'][s] , ex , ey['sgn'][s] )
+            gr.SetMarkerSize(1.5)
+            gr.SetMarkerStyle(1)
+            gr.GetYaxis().SetTitleOffset(1.6)
+            gr.SetLineColor(4)
+            gr.SetLineWidth(4)
+            gr.SetTitle('mean ' + s )
+            gr.GetXaxis().SetTitle('decaying length (mm)')
+            gr.GetYaxis().SetTitle('mean normalized number of events')
+            gr.GetXaxis().SetTitleOffset(1.4)
+            gr.SetName('sgn')
+            gr.Draw('ACP')  # '' sets up the scattering style
+            gr1 = TGraphErrors( len_of_lt , x , yy['qcd'][s] , ex , ey['qcd'][s] )
+            gr1.SetMarkerSize(1.0)
+            gr1.SetMarkerStyle(1)
+            gr.GetYaxis().SetTitleOffset(1.6)
+            gr1.SetLineColor(2)
+            gr1.SetLineWidth(2)
+            gr1.SetName('qcd')
+            #gr1.SetTitle('averaged ' + s)
+            #gr1.GetXaxis().SetTitle('decaying length (mm)')
+            #gr1.GetYaxis().SetTitle('mean frequency')
+            gr1.Draw('CP')  # '' sets up the scattering style
+            legend = TLegend(0.76, 0.56, 0.99, 0.88)
+            legend.SetHeader( 'Entries: ' + eac0 )
+            legend.AddEntry('qcd',legendb)
+            legend.AddEntry('sgn',legends)
+            legend.Draw()
+            for ct in cut_text:
+                cut_text[ct].Draw()
+            c1.Print(path1 + 'mean_' + s + var + cuts.replace('(','_').replace(')','_').replace('&&','A').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
         c1.Update()
         c1.Close() 
-        print('|||||||||||||||||||||||||||||||||||||||||||||||||||')
+        print('|||||||||||||||||||||||||||||||||||||||||||||||||||')        
 ##########################################################
 
 ########################################################################
@@ -355,7 +478,7 @@ def set_hist_yrange():
             hist[cc][s].GetYaxis().SetTitle('normalized number of events')
             hist[cc][s].GetXaxis().SetTitle( s )
             
-            hist_CHS[cc][s].GetYaxis().SetTitleOffset(2.8)
+            hist_CHS[cc][s].GetYaxis().SetTitleOffset(1.6)
             hist_CHS[cc][s].GetYaxis().SetTitle('normalized number of events')
             hist_CHS[cc][s].GetXaxis().SetTitle( s )
             if s == 'elf':
@@ -374,46 +497,38 @@ def init_plotrange():
 
 #===========================================================================================
 #===========================================================================================
-for i in jet:
+if ct_dep == 0:
+    for i in jet:
 
-    init_plotrange()       
+        init_plotrange()       
 
-    for cc in channel:
-        write_1(i,cc,cutting)
+        for cc in channel:
+            write_1(i,cc,cutting)
 
-    set_hist_yrange()
-    plot_2(i,cutting)
+        set_hist_yrange()
+        plot_2(i,cutting)
 
-    plotrange.clear()
-    for cc in channel:
-        clear_hist(cc) 
-        hist[cc].clear()
-        tree.clear() 
-          
+        plotrange.clear()
+        for cc in channel:
+            clear_hist(cc) 
+            hist[cc].clear()
+            tree.clear() 
+elif ct_dep == 1:
+    for i in jet:
+        for cc in channel:
+            write_1(i,cc,cutting)
+        write_2('qcd')
+        write_2('sgn')
+        plot_2(i,cutting)
+        for cc in channel:
+            clear_hist(cc) 
+            hist[cc].clear()
+            tree.clear()   
+
 for cc in channel:
         file_dict[cc].Close()
 #===========================================================================================
 #===========================================================================================
-
-"""
-if ct_dep == 1:
-    life_time = []
-    life_time_float = []
-    len_of_lt = len(life_time)
-    x = array( 'd' )        # array to plot for TGraph
-    ex = array( 'd' )
-
-    #######################################
-    for ll in enumerate( life_time_float ):
-        x.append( ll[1] )
-        ex.append( 0.0  )
-    #######################################
-    file_dict['qcd_200'] = TFile(path0 + "QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root","r")
-
-    for cc in enumerate(life_time):
-        file_dict['sgn_' + cc[1]] = TFile(path0 + "ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-" + cc[1] + "_TuneCUETP8M1_13TeV-powheg-pythia8.root","r")
-
-"""
 
 
 
