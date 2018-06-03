@@ -28,12 +28,12 @@ len_of_lt = len(life_time)
 
 if ct_dep == 0:
     channel = {
-           #'TTbar':'TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root',
+           #'t#bar{t}':'TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root',
            #'QCD':'QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root',
-           #'VBFct0p60g':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
-           #'VBFct0p40g':'VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
-           'ZHct0p40g':'ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
-   	       #'HToBB':'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
+           #'VBF-0mm-60GeV':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
+           #'VBF-0mm-40GeV':'VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
+           'ZH-0mm-40GeV':'ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
+   	       #'H#rightarrowb#bar{b}':'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
           }
 elif ct_dep == 1:
     channel = {}
@@ -46,7 +46,7 @@ elif ct_dep == 1:
 #attr = ['dR_q1','dR_q2','dR_q3','dR_q4']
 #attr = ['pt', 'eta', 'phi', 'CSV', 'chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
 attr = ['nhf']
-attr_dict = {'pt':'Transverse Momentum', 'eta':'#eta', 'phi':'#phi', 'CSV':'Combined Secondary Vertex', 'chf':'Charged Hadron Fraction', 'nhf':'Neutral Hadron Fraction', 'phf':'Photon Fraction', 'elf':'Electron Fraction', 'muf':'Muon Fraction', 'chm':'Charged Hadron Multiplicity', 'cm':'Charged Multiplicity', 'nm':'Neutral Multiplicity'}
+attr_dict = {'pt':'p_{T}', 'eta':'#eta', 'phi':'#phi', 'CSV':'Combined Secondary Vertex(CSV)', 'chf':'Charged Hadron Fraction', 'nhf':'Neutral Hadron Fraction', 'phf':'Photon Fraction', 'elf':'Electron Fraction', 'muf':'Muon Fraction', 'chm':'Charged Hadron Multiplicity', 'cm':'Charged Multiplicity', 'nm':'Neutral Multiplicity'}
 
 ####################################generating list with 10 Jets
 def jet_list_gen(n):
@@ -85,7 +85,7 @@ cutting = cutting_gen('')
 def cut_tex_gen(cut):
     inf = float(88888888)
     cut_str = cut.replace('(','').replace(')','').replace('&&','&').replace('<=','#leq').replace('phi','#phi').replace('eta','#eta').replace('>=','#geq') 
-    cut_str = cut_str.replace('Jet1.','').replace('GenBquark','GBQ')
+    cut_str = cut_str.replace('Jet1.','').replace('GenBquark','Gbq').replace('pt','p_{T}').replace('dR_','#DeltaR-')
     cut_str_list = cut_str.split('&')
     bound = {}
     for ct in cut_str_list:       
@@ -222,9 +222,9 @@ def write_1(var,sample,cuts):
     for s in attr:
         if 'QCD' in sample:
             color1 = 3                 #880+1 #400+3	6 8 634 1
-        elif 'TTbar' in sample:
+        elif 't#bar{t}' in sample:
             color1 = 2  
-        elif 'HToBB' in sample:
+        elif 'H#rightarrowb#bar{b}' in sample:
             color1 = 7                 #800+10 860
         elif 'VBF' in sample:
             color1 = 4
@@ -360,7 +360,7 @@ def plot_2(var,cuts):
             legend.Draw()
             for ct in cut_text:
                 cut_text[ct].Draw()
-            c1.Print(path1 + s + var + cuts.replace('(','_').replace(')','_').replace('&&','A').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
+            c1.Print(path1 + s + var + cuts.replace('(','_').replace(')','_').replace('&&','_').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
             
         elif ct_dep == 1:
             eac0 = str( entries_after_cut['ct0'][s] )
@@ -397,7 +397,7 @@ def plot_2(var,cuts):
             legend.Draw()
             for ct in cut_text:
                 cut_text[ct].Draw()
-            c1.Print(path1 + 'mean_' + s + var + cuts.replace('(','_').replace(')','_').replace('&&','A').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
+            c1.Print(path1 + 'mean_' + s + var + cuts.replace('(','_').replace(')','_').replace('&&','_').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
         c1.Update()
         c1.Close() 
         print('|||||||||||||||||||||||||||||||||||||||||||||||||||')        
