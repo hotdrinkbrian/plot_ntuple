@@ -83,31 +83,86 @@ cutting = cutting_gen('')
 
 ###################################################################################################
 def cut_tex_gen(cut):
+    inf = float(88888888)
     cut_str = cut.replace('(','').replace(')','').replace('&&','&').replace('<=','#leq').replace('phi','#phi').replace('eta','#eta').replace('>=','#geq') 
-    #cut_str = cut_str.replace('Jet1.','') #.replace('GenBquark','GBQ')
+    cut_str = cut_str.replace('Jet1.','').replace('GenBquark','GBQ')
     cut_str_list = cut_str.split('&')
+    bound = {}
+    for ct in cut_str_list:       
+        if '#leq' in ct:             
+            at, n = ct.split('#leq')
+        elif '#geq' in ct:          
+            at, n = ct.split('#geq')
+        elif '<' in ct:            
+            at, n = ct.split('<')
+        elif '>' in ct:            
+            at, n = ct.split('>')  
+        bound[at] = {}
+        bound[at]['LB'] = []
+        bound[at]['UB'] = []
+        bound[at]['syb'] = []
+        bound[at]['B'] = []
+    for ct in cut_str_list:    
+        if '#leq' in ct: 
+            syb = '#leq'
+            at, num = ct.split('#leq')
+        elif '#geq' in ct:
+            syb = '#geq'
+            at, num = ct.split('#geq')
+        elif '<' in ct:
+            syb = '<'
+            at, num = ct.split('<')
+        elif '>' in ct:
+            syb = '>'
+            at, num = ct.split('>')
+                
+        if syb not in bound[at]['syb']:
+            bound[at]['syb'].append(syb)
+        
+        if syb == '#geq' or syb == '>':
+            bound[at]['LB'].append( float(num) )
+            bound[at]['UB'].append( inf )
+        elif syb == '#leq' or syb == '<':    
+            bound[at]['LB'].append( -inf ) 
+            bound[at]['UB'].append( float(num) )                 
     ct_text = {}
-    w = 0
-    for ct in enumerate(cut_str_list):
-        ct_text[ct[0]] = TLatex(.78, .52 - 0.04*w, ct[1])
-        ct_text[ct[0]].SetNDC()
-        ct_text[ct[0]].SetTextSize(0.03)
-        #ct_text[ct[0]].SetTextFont(1)
-        #ct_text[ct[0]].SetTextColor(1)
-        #ct_text[ct[0]].SetTextAlign(22)
-        #ct_text[ct[0]].SetTextAngle(0)
-        #ct_text[ct[0]].DrawText(0.5, 0.4, "x")
-        #ct_text[ct[0]].Draw()
+    w = 0        
+    for a in bound:    
+        bound[a]['B'].append( max(bound[a]['LB']) ) 
+        bound[a]['B'].append( min(bound[a]['UB']) )
+        print bound
+        if -inf == float( min(bound[a]['B']) ):
+            bb = a + ' ' + bound[a]['syb'][0] + ' ' + str( max(bound[a]['B']) )
+        elif inf is float( max(bound[a]['B']) ):    
+            bb = a + ' ' + bound[a]['syb'][0] + ' ' + str( min(bound[a]['B']) )
+        else:
+            if '>' in bound[a]['syb']: 
+                bb = str( min(bound[a]['B']) ) + ' < ' + a 
+                if '<' in bound[a]['syb']:    
+                    bb = bb + ' < ' + str( max(bound[a]['B']) )
+                else:    
+                    bb = bb + ' #leq ' + str( max(bound[a]['B']) )
+            else:
+                bb = str( min(bound[a]['B']) ) + ' #leq ' + a
+                if '<' in bound[a]['syb']:    
+                    bb = bb + ' < ' + str( max(bound[a]['B']) )           
+                else:    
+                    bb = bb + ' #leq ' + str( max(bound[a]['B']) )                            
+        ct_text[a] = TLatex(.77, .51 - 0.04*w, bb)  
+        ct_text[a].SetNDC()
+        ct_text[a].SetTextSize(0.03)
         w += 1
     return ct_text    
 ###################################################################################################
-cut_text = cut_tex_gen(cutting)  
+cut_text = cut_tex_gen(cutting) 
 
 print('---------cut:')
 print(cutting)
 cutting_CHS = cutting_gen('CHS')
 print('---------cut_CHS:')
 print(cutting_CHS)
+
+
 
 entry = {'entries': ''}
 #++++++++++++++++++++++++++++cuts+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -269,12 +324,8 @@ def plot_2(var,cuts):
             if CHS == 1:
                 legend.AddEntry(hist_CHS[cc][s],cc + 'CHS')
         legend.Draw()
-        
-        
-        for ct in enumerate(cut_text):
-            cut_text[ct[0]].Draw()
-    
-        
+        for ct in cut_text:
+            cut_text[ct].Draw()
         c1.Print(path1 + s + var + cuts.replace('(','_').replace(')','_').replace('&&','A').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
         c1.Update()
         c1.Close() 
