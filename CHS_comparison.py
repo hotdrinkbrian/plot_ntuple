@@ -11,7 +11,7 @@ start= timer()
 gStyle.SetOptStat(0)
 path0 = "/nfs/dust/cms/user/lbenato/RecoStudies_ntuples_v4/"
 #path1 = "/afs/desy.de/user/h/hezhiyua/private/qcd_vs_ctau0p60g_v3/"
-path1 = "/afs/desy.de/user/h/hezhiyua/private/vbf_vs_zh40g0mm_v1/"
+path1 = "/afs/desy.de/user/h/hezhiyua/private/mean_qcd_vs_sgn_v1/"
 #path0 = "D:\\py_tests\\sec_data\\RecoStudies_ntuples_v2\\"
 #path1 = "D:\\py_tests\\plots\\"
 #path0 = "/afs/desy.de/user/h/hezhiyua/private/sec_data/60GeV/"
@@ -22,8 +22,8 @@ twoD = 0 # 2D plot option: 0 --> 1D
 CHS = 0 # CHS jet option: 0 --> off
 number_of_bin = 100
 num_of_jets = 1
-life_time = ['0','0p05','1','10','100','1000','10000']
-life_time_float = [0.001,0.05,1,10,100,1000,10000]
+life_time = ['0','0p1','1','10','100','500','1000','2000','5000','10000']
+life_time_float = [0.001,0.1,1,10,100,500,1000,2000,5000,10000]
 len_of_lt = len(life_time)
 
 if ct_dep == 0:
@@ -44,8 +44,9 @@ elif ct_dep == 1:
     legendb = 'BKG(QCD)'
 
 #attr = ['dR_q1','dR_q2','dR_q3','dR_q4']
+attr = ['pt', 'eta', 'phi', 'CSV', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
 #attr = ['pt', 'eta', 'phi', 'CSV', 'chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
-attr = ['nhf']
+#attr = ['chf']
 attr_dict = {'pt':'p_{T}', 'eta':'#eta', 'phi':'#phi', 'CSV':'Combined Secondary Vertex(CSV)', 'chf':'Charged Hadron Fraction', 'nhf':'Neutral Hadron Fraction', 'phf':'Photon Fraction', 'elf':'Electron Fraction', 'muf':'Muon Fraction', 'chm':'Charged Hadron Multiplicity', 'cm':'Charged Multiplicity', 'nm':'Neutral Multiplicity'}
 
 ####################################generating list with 10 Jets
