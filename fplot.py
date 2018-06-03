@@ -290,7 +290,7 @@ def write_1(var,sample,cuts):
         
         normalizationFactor = float(hist[sample][s].Integral())
         #normalizationFactor_CHS = float(hist_CHS[sample][s].Integral())
-        if normalizationFactor != 0 and normalizationFactor_CHS != 0:
+        if normalizationFactor != 0: #and normalizationFactor_CHS != 0:
             normalizationFactor = 1 / normalizationFactor
             #normalizationFactor_CHS = 1 / normalizationFactor_CHS
             hist[sample][s].Scale( normalizationFactor )
