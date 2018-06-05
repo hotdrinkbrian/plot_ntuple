@@ -1,6 +1,6 @@
 from __future__ import division
 from ROOT import ROOT, gROOT, TDirectory, TFile, gFile, TBranch, TLeaf, TTree
-from ROOT import TText, TPaveLabel, TLatex, TGraphErrors
+from ROOT import TText, TPaveLabel, TLatex, TGraphErrors, TLine, gPad
 from ROOT import TH1, TH1F, TH2F, TChain, TCanvas, TLegend, gStyle
 from array import array
 import math
@@ -39,14 +39,15 @@ elif ct_dep == 1:
     channel = {}
     for lt in life_time:
         channel['ct' + lt] = '/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-' + lt + '_TuneCUETP8M1_13TeV-powheg-pythia8.root'
-    channel['QCD'] = '/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root'
+    #channel['QCD'] = '/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root'
+    channel['QCD'] = '/VBFHToBB_M-125_13TeV_powheg_pythia8.root'
     legends = 'SGN(VBF)'
-    legendb = 'BKG(QCD)'
+    legendb = 'BKG(H#rightarrowb#bar{b})'
 
 #attr = ['dR_q1','dR_q2','dR_q3','dR_q4']
-attr = ['chf','nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
+#attr = ['chf','nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
 #attr = ['pt', 'eta', 'phi', 'CSV', 'chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
-#attr = ['chf']
+attr = ['chf']
 attr_dict = {'pt':'p_{T}', 'eta':'#eta', 'phi':'#phi', 'CSV':'Combined Secondary Vertex(CSV)', 'chf':'Charged Hadron Fraction', 'nhf':'Neutral Hadron Fraction', 'phf':'Photon Fraction', 'elf':'Electron Fraction', 'muf':'Muon Fraction', 'chm':'Charged Hadron Multiplicity', 'cm':'Charged Multiplicity', 'nm':'Neutral Multiplicity'}
 
 ####################################generating list with 10 Jets
@@ -362,6 +363,13 @@ def plot_2(var,cuts):
             legend.Draw()
             for ct in cut_text:
                 cut_text[ct].Draw()
+
+            #l = TLine(12,0.0,12,0.09)
+            l = TLine(0.35,0.0,0.35,0.05)
+            l.SetLineColor(2)
+            l.SetLineWidth(3)
+            l.Draw('same')
+
             c1.Print(path1 + s + var + cuts.replace('(','_').replace(')','_').replace('&&','_').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
             
         elif ct_dep == 1:
@@ -394,8 +402,8 @@ def plot_2(var,cuts):
             gr1.Draw('CP')  # '' sets up the scattering style
             legend = TLegend(0.76, 0.56, 0.99, 0.88)
             legend.SetHeader( 'Entries: ' + eac0 )
-            legend.AddEntry('QCD',legendb)
-            legend.AddEntry('sgn',legends)
+            legend.AddEntry('QCD', legendb, 'l')
+            legend.AddEntry('sgn', legends, 'l')
             legend.Draw()
             for ct in cut_text:
                 cut_text[ct].Draw()

@@ -394,8 +394,8 @@ def plot_2(var,cuts):
             gr1.Draw('CP')  # '' sets up the scattering style
             legend = TLegend(0.76, 0.56, 0.99, 0.88)
             legend.SetHeader( 'Entries: ' + eac0 )
-            legend.AddEntry('QCD',legendb)
-            legend.AddEntry('sgn',legends)
+            legend.AddEntry('QCD',legendb,'l')
+            legend.AddEntry('sgn',legends,'l')
             legend.Draw()
             for ct in cut_text:
                 cut_text[ct].Draw()
