@@ -17,7 +17,7 @@ path1 = "/afs/desy.de/user/h/hezhiyua/private/mean_qcd_vs_sgn_v1/"
 #path0 = "/afs/desy.de/user/h/hezhiyua/private/sec_data/60GeV/"
 #path1 = "/afs/desy.de/user/h/hezhiyua/public/qcd_vs_ctau0_vs_ctau100_ms60/"      
 
-ct_dep = 1 #1 for ct dependence comparison
+ct_dep = 0 #1 for ct dependence comparison
 twoD = 0 # 2D plot option: 0 --> 1D
 CHS = 0 # CHS jet option: 0 --> off
 number_of_bin = 100
@@ -28,25 +28,26 @@ len_of_lt = len(life_time)
 
 if ct_dep == 0:
     channel = {
-           #'t#bar{t}':'TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root',
-           #'QCD':'QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root',
+           't#bar{t}':'TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root',
+           'QCD':'QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root',
            #'VBF-0mm-60GeV':'VBFH_HToSSTobbbb_MH-125_MS-60_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
-           #'VBF-0mm-40GeV':'VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
-           'ZH-0mm-40GeV':'ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
-   	       #'H#rightarrowb#bar{b}':'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
+           'VBF-500mm-40GeV':'VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8.root',
+           #'ZH-0mm-40GeV':'ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
+   	   'H#rightarrowb#bar{b}':'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
           }
 elif ct_dep == 1:
     channel = {}
     for lt in life_time:
         channel['ct' + lt] = '/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-' + lt + '_TuneCUETP8M1_13TeV-powheg-pythia8.root'
     channel['QCD'] = '/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root'
+    #channel['QCD'] = '/VBFHToBB_M-125_13TeV_powheg_pythia8.root'
     legends = 'SGN(VBF)'
     legendb = 'BKG(QCD)'
 
 #attr = ['dR_q1','dR_q2','dR_q3','dR_q4']
-attr = ['pt', 'eta', 'phi', 'CSV', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
+#attr = ['chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
 #attr = ['pt', 'eta', 'phi', 'CSV', 'chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
-#attr = ['chf']
+attr = ['chf']
 attr_dict = {'pt':'p_{T}', 'eta':'#eta', 'phi':'#phi', 'CSV':'Combined Secondary Vertex(CSV)', 'chf':'Charged Hadron Fraction', 'nhf':'Neutral Hadron Fraction', 'phf':'Photon Fraction', 'elf':'Electron Fraction', 'muf':'Muon Fraction', 'chm':'Charged Hadron Multiplicity', 'cm':'Charged Multiplicity', 'nm':'Neutral Multiplicity'}
 
 ####################################generating list with 10 Jets
