@@ -17,7 +17,7 @@ path1 = "/afs/desy.de/user/h/hezhiyua/private/all_sgn_v1/"
 #path0 = "/afs/desy.de/user/h/hezhiyua/private/sec_data/60GeV/"
 #path1 = "/afs/desy.de/user/h/hezhiyua/public/qcd_vs_ctau0_vs_ctau100_ms60/"      
 
-ct_dep = 0 #1 for ct dependence comparison
+ct_dep = 1 #1 for ct dependence comparison
 twoD = 0 # 2D plot option: 0 --> 1D
 CHS = 0 # CHS jet option: 0 --> off
 number_of_bin = 100
@@ -29,25 +29,25 @@ len_of_lt = len(life_time)
 if ct_dep == 0:
     channel = {
            #'t#bar{t}':'TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root',
-           #'QCD':'QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root',
+           'QCD':'QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_small.root',
            'VBF-500mm-40GeV':'VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8.root',
            #'VBF-0mm-40GeV':'VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
            #'ZH-0mm-40GeV':'ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
-   	   'H#rightarrowb#bar{b}':'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
+   	   #'H#rightarrowb#bar{b}':'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
           }
 elif ct_dep == 1:
     channel = {}
     for lt in life_time:
         channel['ct' + lt] = '/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-' + lt + '_TuneCUETP8M1_13TeV-powheg-pythia8.root'
-    #channel['QCD'] = '/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8.root'
-    channel['QCD'] = '/VBFHToBB_M-125_13TeV_powheg_pythia8.root'
+    channel['QCD'] = '/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_small.root'
+    #channel['QCD'] = '/VBFHToBB_M-125_13TeV_powheg_pythia8.root'
     legends = 'SGN(VBF)'
-    legendb = 'BKG(H#rightarrowb#bar{b})'
+    legendb = 'BKG(QCD)'
 
 #attr = ['dR_q1','dR_q2','dR_q3','dR_q4']
 #attr = ['chf','nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
 #attr = ['pt', 'eta', 'phi', 'CSV', 'chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
-attr = ['chf']
+attr = ['chm']
 attr_dict = {'pt':'p_{T}', 'eta':'#eta', 'phi':'#phi', 'CSV':'Combined Secondary Vertex(CSV)', 'chf':'Charged Hadron Fraction', 'nhf':'Neutral Hadron Fraction', 'phf':'Photon Fraction', 'elf':'Electron Fraction', 'muf':'Muon Fraction', 'chm':'Charged Hadron Multiplicity', 'cm':'Charged Multiplicity', 'nm':'Neutral Multiplicity'}
 
 ####################################generating list with 10 Jets
@@ -78,10 +78,11 @@ def cut_dict_gen(cut_name):
 def cutting_gen(pref):
     for i in jet:
         cuts = cut_dict_gen( pref + i + '.'  )
-    cuttings = cuts['pt'] + '&&' + cuts['eta'] + '&&' + cuts['dR']  #+ '&&' + cut_dict['GenBquark']
-    return cuttings
+    cuttings_sgn = cuts['pt'] + '&&' + cuts['eta'] + '&&' + cuts['dR']  #+ '&&' + cut_dict['GenBquark']
+    cuttings_bkg = cuts['pt'] + '&&' + cuts['eta'] 
+    return cuttings_bkg, cuttings_sgn
 ###################################################################################################
-cutting = cutting_gen('')
+cutting_bkg, cutting_sgn = cutting_gen('')
 
 ###################################################################################################
 def cut_tex_gen(cut):
@@ -156,13 +157,10 @@ def cut_tex_gen(cut):
         w += 1
     return ct_text    
 ###################################################################################################
-cut_text = cut_tex_gen(cutting) 
+cut_text = cut_tex_gen(cutting_sgn) 
 
 print('---------cut:')
-print(cutting)
-cutting_CHS = cutting_gen('CHS')
-print('---------cut_CHS:')
-print(cutting_CHS)
+print(cutting_sgn)
 
 
 
@@ -282,6 +280,10 @@ def write_1(var,sample,cuts):
         hist[sample][s].Sumw2()
         #hist_CHS[sample][s].Sumw2()
 
+
+        
+
+
         if twoD == 0:
             tree[sample].Project(sample+s, var + '.' + s, cuts ) 
             #tree[sample].Project(sample+s+'CHS', 'CHS' + var + '.' + s, cuts + '_CHS' )
@@ -363,9 +365,10 @@ def plot_2(var,cuts):
             legend.Draw()
             for ct in cut_text:
                 cut_text[ct].Draw()
-
-            #l = TLine(12,0.0,12,0.09)
-            l = TLine(0.35,0.0,0.35,0.05)
+            
+            #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Line for critical value
+            l = TLine(13.5,0.0,13.5,0.09)
+            #l = TLine(0.40,0.0,0.40,0.05)
             l.SetLineColor(2)
             l.SetLineWidth(3)
             l.Draw('same')
@@ -459,6 +462,12 @@ init_plotrange()
 if ct_dep == 0:
     for i in jet:    
         for cc in channel:
+            
+            if cc == "QCD":
+                cutting = cutting_bkg
+            else:
+                cutting = cutting_sgn
+
             write_1(i,cc,cutting)
 
         set_hist_yrange()
@@ -467,6 +476,12 @@ if ct_dep == 0:
 elif ct_dep == 1:
     for i in jet:
         for cc in channel:
+
+            if cc == "QCD":
+                cutting = cutting_bkg
+            else:
+                cutting = cutting_sgn
+
             write_1(i,cc,cutting)
         write_2('QCD')
         write_2('sgn')
