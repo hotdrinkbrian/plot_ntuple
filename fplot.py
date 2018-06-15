@@ -9,28 +9,31 @@ from timeit import default_timer as timer
 start= timer()
 #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Settings~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 gStyle.SetOptStat(0)
-path0 = "/nfs/dust/cms/user/lbenato/RecoStudies_ntuples_v4/"
+#path0 = "/nfs/dust/cms/user/lbenato/RecoStudies_ntuples_v4/"
+#path0 = '/nfs/dust/cms/user/lbenato/RecoStudies_ntuples_v8/'
 #path1 = "/afs/desy.de/user/h/hezhiyua/private/qcd_vs_ctau0p60g_v3/"
-path1 = "/afs/desy.de/user/h/hezhiyua/private/all_sgn_v1/"
+path1 = "/afs/desy.de/user/h/hezhiyua/private/ct_qcd_sgn_v8/"
 #path0 = "D:\\py_tests\\sec_data\\RecoStudies_ntuples_v2\\"
 #path1 = "D:\\py_tests\\plots\\"
-#path0 = "/afs/desy.de/user/h/hezhiyua/private/sec_data/60GeV/"
+path0 = '/afs/desy.de/user/h/hezhiyua/private/working_datas/'
 #path1 = "/afs/desy.de/user/h/hezhiyua/public/qcd_vs_ctau0_vs_ctau100_ms60/"      
 
-ct_dep = 1 #1 for ct dependence comparison
+ct_dep = 0 #1 for ct dependence comparison
+cut_on = 0 #1 to apply cuts
 twoD = 0 # 2D plot option: 0 --> 1D
 CHS = 0 # CHS jet option: 0 --> off
+critical_line = 1 #draw red line 
 number_of_bin = 100
 num_of_jets = 1
-life_time = ['0','0p1','1','10','100','500','1000','2000','5000','10000']
-life_time_float = [0.001,0.1,1,10,100,500,1000,2000,5000,10000]
+life_time = ['0','0p05','0p1','1','5','10','25','50','100','500','1000','2000','5000','10000']
+life_time_float = [0.001,0.05,0.1,1,5,10,25,50,100,500,1000,2000,5000,10000]
 len_of_lt = len(life_time)
 
 if ct_dep == 0:
     channel = {
            #'t#bar{t}':'TT_TuneCUETP8M2T4_13TeV-powheg-pythia8.root',
-           'QCD':'QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_small.root',
-           'VBF-500mm-40GeV':'VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8.root',
+           'QCD':'QCD_HT100To200_1j_skimed.root',
+           'VBF-500mm-40GeV':'VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-500_TuneCUETP8M1_13TeV-powheg-pythia8_4mj_skimed.root',
            #'VBF-0mm-40GeV':'VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
            #'ZH-0mm-40GeV':'ZH_HToSSTobbbb_ZToLL_MH-125_MS-40_ctauS-0_TuneCUETP8M1_13TeV-powheg-pythia8.root',
    	   #'H#rightarrowb#bar{b}':'VBFHToBB_M-125_13TeV_powheg_pythia8.root'
@@ -38,8 +41,8 @@ if ct_dep == 0:
 elif ct_dep == 1:
     channel = {}
     for lt in life_time:
-        channel['ct' + lt] = '/VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-' + lt + '_TuneCUETP8M1_13TeV-powheg-pythia8.root'
-    channel['QCD'] = '/QCD_HT200to300_TuneCUETP8M1_13TeV-madgraphMLM-pythia8_small.root'
+        channel['ct' + lt] = 'VBFH_HToSSTobbbb_MH-125_MS-40_ctauS-' + lt + '_TuneCUETP8M1_13TeV-powheg-pythia8'+'_4mj_skimed'+'.root'
+    channel['QCD'] = 'QCD_HT100To200_1j_skimed.root'
     #channel['QCD'] = '/VBFHToBB_M-125_13TeV_powheg_pythia8.root'
     legends = 'SGN(VBF)'
     legendb = 'BKG(QCD)'
@@ -47,7 +50,8 @@ elif ct_dep == 1:
 #attr = ['dR_q1','dR_q2','dR_q3','dR_q4']
 #attr = ['chf','nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
 #attr = ['pt', 'eta', 'phi', 'CSV', 'chf', 'nhf', 'phf', 'elf', 'muf', 'chm', 'cm', 'nm']
-attr = ['chm']
+attr = ['nhf','chf']
+#attr = ['chm']
 attr_dict = {'pt':'p_{T}', 'eta':'#eta', 'phi':'#phi', 'CSV':'Combined Secondary Vertex(CSV)', 'chf':'Charged Hadron Fraction', 'nhf':'Neutral Hadron Fraction', 'phf':'Photon Fraction', 'elf':'Electron Fraction', 'muf':'Muon Fraction', 'chm':'Charged Hadron Multiplicity', 'cm':'Charged Multiplicity', 'nm':'Neutral Multiplicity'}
 
 ####################################generating list with 10 Jets
@@ -55,7 +59,9 @@ def jet_list_gen(n):
     jl = []
     for ii in range(1,n+1): 
         if CHS == 0:
-            jl.append('Jet' + "%s" %ii)
+            #jl.append('Jet' + "%s" %ii)
+            jl.append('Jet' + "%s" %ii + 's')
+
         elif CHS == 1:
             jl.append('CHSJet' + "%s" %ii)
     return jl
@@ -83,6 +89,8 @@ def cutting_gen(pref):
     return cuttings_bkg, cuttings_sgn
 ###################################################################################################
 cutting_bkg, cutting_sgn = cutting_gen('')
+if cut_on == 0:
+    cutting_bkg, cutting_sgn = '', ''
 
 ###################################################################################################
 def cut_tex_gen(cut):
@@ -157,7 +165,13 @@ def cut_tex_gen(cut):
         w += 1
     return ct_text    
 ###################################################################################################
-cut_text = cut_tex_gen(cutting_sgn) 
+if cut_on == 0:
+    cut_text = {}
+    cut_text['no cut'] = TLatex(.77, .51 - 0.04*0, 'no cuts')
+    cut_text['no cut'].SetNDC()
+    cut_text['no cut'].SetTextSize(0.03)
+elif cut_on == 1:
+    cut_text = cut_tex_gen(cutting_sgn) 
 
 print('---------cut:')
 print(cutting_sgn)
@@ -268,7 +282,8 @@ def write_1(var,sample,cuts):
         elif s == 'nPV':
             h_par = [number_of_bin,0,80]
 
-        tree[sample] = file_dict[sample].Get('reconstruction;1').Get('tree') #.Get('ntuple;1').Get('tree')
+        #tree[sample] = file_dict[sample].Get('reconstruction;1').Get('tree') #.Get('ntuple;1').Get('tree')
+        tree[sample] = file_dict[sample].Get('tree44')
         if twoD == 0:
             hist[sample][s] = TH1F(sample+s, '; %s; events' %s , h_par[0], h_par[1], h_par[2])
             #hist_CHS[sample][s] = TH1F(sample+s + 'CHS', '; %s; events' %s , h_par[0], h_par[1], h_par[2])
@@ -367,11 +382,16 @@ def plot_2(var,cuts):
                 cut_text[ct].Draw()
             
             #>>>>>>>>>>>>>>>>>>>>>>>>>>>>>Line for critical value
-            l = TLine(13.5,0.0,13.5,0.09)
-            #l = TLine(0.40,0.0,0.40,0.05)
+            if s == 'chm':
+                l = TLine(12.7,0.0,12.7,0.09)
+            elif s == 'chf':
+                l = TLine(0.48,0.0,0.48,0.027)
+            elif s == 'nhf':
+                l = TLine(0.16,0.0,0.16,0.29)
             l.SetLineColor(2)
             l.SetLineWidth(3)
-            l.Draw('same')
+            if critical_line == 1: 
+                l.Draw('same')
 
             c1.Print(path1 + s + var + cuts.replace('(','_').replace(')','_').replace('&&','_').replace('>','LG').replace('<','LS').replace('=','EQ').replace('.','P').replace('-','N').replace('Jet','J').replace('GenBquark','GBQ') + ".pdf")
             
